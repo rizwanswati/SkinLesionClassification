@@ -49,22 +49,45 @@ for filePath in glob.glob(ddi_clean):
     cv2.imwrite(ddi_clean_output+"Inpainted/"+filename, inpaintedImage,
                 [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
-    # # Now applying Median Filter to Smoothen up the image
-    # # creating an image object
-    imgForMedianFilter = Image.open(ddi_clean_output+"Inpainted/"+filename)
-    medianFilteredImage = imgForMedianFilter.filter(ImageFilter.MedianFilter(size=3))
-    medianFilteredImage.save(ddi_clean_output+"MedianFilteredImages/"+filename)
-
-    # Removing Blue marks from the photo using replacement pixels technique and inpainting
-    # Method 1: Simplistic overpaint blue with white
-    imageForBlueRemoval = cv2.imread(ddi_clean_output+"MedianFilteredImages/"+filename)
-
-    hsv = cv2.cvtColor(imageForBlueRemoval,cv2.COLOR_BGR2HSV)
+    # Blue color removal
+    blueImage = cv2.imread(ddi_clean_output+"Inpainted/"+filename)
+    hsv = cv2.cvtColor(blueImage, cv2.COLOR_BGR2HSV)
     lower_blue = np.array([100, 50, 50])
     upper_blue = np.array([150, 255, 255])
+
+    kernel = np.ones((3, 3), np.uint8)
+    mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
+    mask_blue2 = cv2.dilate(mask_blue, kernel, iterations=5)
+    dst = cv2.inpaint(blueImage, mask_blue2, 3, cv2.INPAINT_TELEA)
+    cv2.imwrite(ddi_clean_output + "BlueMarksRemoved/" + filename, dst,
+                [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+
+    # purple color removal
+    purple = cv2.imread(ddi_clean_output + "BlueMarksRemoved/" + filename)
+
+    hsv = cv2.cvtColor(purple, cv2.COLOR_BGR2HSV)
+    lower_blue = np.array([129, 50, 70])
+    upper_blue = np.array([158, 255, 255])
     kernel = np.ones((5, 5), np.uint8)
     mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
-    mask_blue2 = cv2.dilate(mask_blue, kernel, iterations=4)
-    dst = cv2.inpaint(imageForBlueRemoval, mask_blue2, 3, cv2.INPAINT_TELEA)
-    cv2.imwrite(ddi_clean_output+"BlueMarksRemoved/"+filename, dst,
+    mask_blue2 = cv2.dilate(mask_blue, kernel, iterations=6)
+    dst = cv2.inpaint(purple, mask_blue2, 3, cv2.INPAINT_TELEA)
+    cv2.imwrite(ddi_clean_output + "PurpleRemoved/" + filename, dst,
                 [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+
+    # black color removal
+    black = cv2.imread(ddi_clean_output + "PurpleRemoved/" + filename)
+
+    hsv = cv2.cvtColor(black, cv2.COLOR_BGR2HSV)
+    lower_blue = np.array([0, 0, 0])
+    upper_blue = np.array([180, 255, 30])
+    kernel = np.ones((5, 5), np.uint8)
+    mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
+    mask_blue2 = cv2.dilate(mask_blue, kernel, iterations=6)
+    dst = cv2.inpaint(black, mask_blue2, 3, cv2.INPAINT_TELEA)
+    cv2.imwrite(ddi_clean_output + "BlackMarkRemoved/" + filename, dst,
+                [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+
+    imgForMedianFilter = Image.open(ddi_clean_output + "BlackMarkRemoved/" + filename)
+    medianFilteredImage = imgForMedianFilter.filter(ImageFilter.MedianFilter(size=1))
+    medianFilteredImage.save(ddi_clean_output + "MedianFilteredImages/" + filename)
