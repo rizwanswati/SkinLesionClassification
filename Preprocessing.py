@@ -45,7 +45,7 @@ for filePath in glob.glob(ddi_clean):
                 [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
     # # inpaint the original image depending on the mask
-    inpaintedImage = cv2.inpaint(src,thresh2Image,1,cv2.INPAINT_TELEA)
+    inpaintedImage = cv2.inpaint(src,thresh2Image,3,cv2.INPAINT_TELEA)
     cv2.imwrite(ddi_clean_output+"Inpainted/"+filename, inpaintedImage,
                 [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
@@ -58,22 +58,13 @@ for filePath in glob.glob(ddi_clean):
     # Removing Blue marks from the photo using replacement pixels technique and inpainting
     # Method 1: Simplistic overpaint blue with white
     imageForBlueRemoval = cv2.imread(ddi_clean_output+"MedianFilteredImages/"+filename)
-    # Define lower and upper limits of our blue
-    # BlueMin = np.array([90, 200, 200], np.uint8)
-    # BlueMax = np.array([100, 255, 255], np.uint8)
-    #
-    # # Go to HSV colourspace and get mask of blue pixels
-    # HSV = cv2.cvtColor(imageForBlueRemoval, cv2.COLOR_BGR2HSV)
-    # mask = cv2.inRange(HSV, BlueMin, BlueMax)
-    #
-    # SE = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-    # mask = cv2.dilate(mask, kernel, iterations=1)
-    #
-    # # Make all pixels in mask white
-    # imageForBlueRemoval[mask > 0] = [255, 255, 255]
 
-    imageForBlueRemoval[np.all(imageForBlueRemoval == (255, 0, 0), axis=-1)] = np.uint8([255, 255, 255])
-    mask = np.all(imageForBlueRemoval == (255, 0, 0), axis=-1)
-    blueDotsRemovedImage = cv2.inpaint(imageForBlueRemoval, np.uint8(mask) * 255, 3, cv2.INPAINT_TELEA)
-    cv2.imwrite(ddi_clean_output+"BlueMarksRemoved/"+filename, blueDotsRemovedImage,
+    hsv = cv2.cvtColor(imageForBlueRemoval,cv2.COLOR_BGR2HSV)
+    lower_blue = np.array([100, 50, 50])
+    upper_blue = np.array([150, 255, 255])
+    kernel = np.ones((5, 5), np.uint8)
+    mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
+    mask_blue2 = cv2.dilate(mask_blue, kernel, iterations=4)
+    dst = cv2.inpaint(imageForBlueRemoval, mask_blue2, 3, cv2.INPAINT_TELEA)
+    cv2.imwrite(ddi_clean_output+"BlueMarksRemoved/"+filename, dst,
                 [int(cv2.IMWRITE_JPEG_QUALITY), 90])
