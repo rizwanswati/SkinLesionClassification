@@ -10,20 +10,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.utils.image_utils import load_img, img_to_array, save_img
 import glob
 
-FolderPathBenign = [
-    "D:/MS Thesis/SkinLesionDetectionCode/Benign/Black/*.png",
-    "D:/MS Thesis/SkinLesionDetectionCode/Benign/Brown/*.png",
-    "D:/MS Thesis/SkinLesionDetectionCode/Benign/White/*.png"
-]
 
-FolderPathMalignant = [
-    "D:/MS Thesis/SkinLesionDetectionCode/Malignant/Black/*.png",
-    "D:/MS Thesis/SkinLesionDetectionCode/Malignant/Brown/*.png",
-    "D:/MS Thesis/SkinLesionDetectionCode/Malignant/White/*.png"
-]
-
-outputPathBenign = "D:/MS Thesis/SkinLesionDetectionCode/Benign/"
-outputPathMalignant = "D:/MS Thesis/SkinLesionDetectionCode/Malignant/"
 
 def augment(folderPath, outputPath, iteration):
     data_gen = ImageDataGenerator(rescale=1./255,shear_range=0.2,zoom_range=0.1,horizontal_flip=True,vertical_flip=True)
@@ -41,3 +28,28 @@ def augment(folderPath, outputPath, iteration):
                                             save_format=".png")):
             if i >= iteration:
                 break
+
+
+FolderPathBenign = [
+    "D:/MS Thesis/SkinLesionDetectionCode/Benign/Black/*.png",
+    "D:/MS Thesis/SkinLesionDetectionCode/Benign/Brown/*.png",
+    "D:/MS Thesis/SkinLesionDetectionCode/Benign/White/*.png"
+]
+
+FolderPathMalignant = [
+    "D:/MS Thesis/SkinLesionDetectionCode/Malignant/Black/*.png",
+    "D:/MS Thesis/SkinLesionDetectionCode/Malignant/Brown/*.png",
+    "D:/MS Thesis/SkinLesionDetectionCode/Malignant/White/*.png"
+]
+
+outputPathBenign = "D:/MS Thesis/SkinLesionDetectionCode/Benign/"
+outputPathMalignant = "D:/MS Thesis/SkinLesionDetectionCode/Malignant/"
+
+
+for folderPath in FolderPathBenign:
+    augment(folderPath, outputPathBenign, 1)
+
+
+for folderPath in FolderPathMalignant:
+    augment(folderPath, outputPathMalignant, 6)
+
