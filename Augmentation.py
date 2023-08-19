@@ -12,7 +12,7 @@ import glob
 
 
 def augment(folderPath, outputPath, iteration):
-    data_gen = ImageDataGenerator(rescale=1. / 255, shear_range=0.2, zoom_range=0.1, horizontal_flip=True,
+    data_gen = ImageDataGenerator(rescale=1. / 255, shear_range=0.2, zoom_range=0.01, horizontal_flip=True,
                                   vertical_flip=True)
     # now taking image one by one and converting it to tensor
     for filePath in glob.glob(folderPath):
@@ -50,7 +50,7 @@ def main():
         augment(folderPath, output_path_benign, 1)
 
     for folderPath in folder_path_malignant:
-        augment(folderPath, output_path_malignant, 6)
+        augment(folderPath, output_path_malignant, 5)
 
 
 if __name__ == '__main__':
