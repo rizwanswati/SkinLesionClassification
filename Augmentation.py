@@ -50,7 +50,7 @@ def main():
         augment(folderPath, output_path_benign, 1)
 
     for folderPath in folder_path_malignant:
-        augment(folderPath, output_path_malignant, 5)
+        augment(folderPath, output_path_malignant, 7)
 
 
 if __name__ == '__main__':
