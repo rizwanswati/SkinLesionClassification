@@ -4,6 +4,7 @@
     Dated : @8/20/2023
     Author : @Mahnoor Khan
 """
+
 from sklearn.model_selection import StratifiedShuffleSplit
 import pandas as pd
 
@@ -21,7 +22,9 @@ def stratify(filePath):
         y_train = y.loc[train_index]
         y_test = y.loc[test_index]
 
-        # Split the data into training and test sets
+
+
+    # Split the data into training and test sets
     for train_index, test_index in split.split(X_train, y_train):
         X_train = X.loc[train_index]
         X_validation = X.loc[test_index]
