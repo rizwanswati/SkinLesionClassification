@@ -27,11 +27,9 @@ def stratify(filePath):
     data = pd.read_csv(filePath)
     X = data.drop("malignant", axis=1)
     y = data["malignant"]
-    #split = StratifiedShuffleSplit(n_splits=1, test_size=0.1, random_state=42)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=1, stratify=y)
     X_train_actual, X_validation, y_train_actual, y_validation = train_test_split(X_train, y_train, test_size=0.1, random_state=1)
-
 
     saveimages(X_test, image_path, testing)
     saveimages(X_validation, image_path, validation)
