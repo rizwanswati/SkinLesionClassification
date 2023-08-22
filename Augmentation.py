@@ -43,14 +43,14 @@ def main():
         "D:/MS Thesis/SkinLesionDetectionCode/Malignant/White/*.png"
     ]
 
-    output_path_benign = "D:/MS Thesis/SkinLesionDetectionCode/Benign/"
-    output_path_malignant = "D:/MS Thesis/SkinLesionDetectionCode/Malignant/"
+    output_path_benign = "D:/MS Thesis/SkinLesionDetectionCode/TrainDS/benign/"
+    output_path_malignant = "D:/MS Thesis/SkinLesionDetectionCode/TrainDS/malignant/"
 
     for folderPath in folder_path_benign:
         augment(folderPath, output_path_benign, 1)
 
     for folderPath in folder_path_malignant:
-        augment(folderPath, output_path_malignant, 7)
+        augment(folderPath, output_path_malignant, 5)
 
 
 if __name__ == '__main__':
