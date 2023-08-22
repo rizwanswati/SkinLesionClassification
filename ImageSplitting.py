@@ -1,6 +1,12 @@
 """
-This file is used to split the training images into two folders, Benign, Malignant,
-that are further divided into three folders i.e. Black, white, brown.
+    This file is used to split the training images into two folders, Benign, Malignant,
+    that are further divided into three folders i.e. Black, white, brown.
+
+    output_path_benign = "D:/MS Thesis/SkinLesionDetectionCode/Benign/"
+    output_path_malignant = "D:/MS Thesis/SkinLesionDetectionCode/Malignant/"
+    training_folder_path = "D:/MS Thesis/SkinLesionDetectionCode/Training/*.png"
+    training_folder = "D:/MS Thesis/SkinLesionDetectionCode/Training/"
+    class_file_path = "D:/MS Thesis/SkinLesionDetectionCode/ddi_metadata.csv"
 
 """
 import glob
@@ -40,11 +46,11 @@ def split_images(training_image_folder, output_benign, out_malignant,class_file_
 
 
 def main():
-    output_path_benign = "D:/MS Thesis/SkinLesionDetectionCode/Benign/"
-    output_path_malignant = "D:/MS Thesis/SkinLesionDetectionCode/Malignant/"
-    training_folder_path = "D:/MS Thesis/SkinLesionDetectionCode/Training/*.png"
-    training_folder = "D:/MS Thesis/SkinLesionDetectionCode/Training/"
-    class_file_path = "D:/MS Thesis/SkinLesionDetectionCode/ddi_metadata.csv"
+    output_path_benign = "D:/SkinLesionClassification/Augmentation/Benign/"
+    output_path_malignant = "D:/SkinLesionClassification/Augmentation/Malignant/"
+    training_folder_path = "D:/SkinLesionClassification/Training/*.png"
+    training_folder = "D:/SkinLesionClassification/Training/"
+    class_file_path = "D:/SkinLesionClassification/ddi_metadata.csv"
 
     split_images(training_folder_path, output_path_benign, output_path_malignant,class_file_path,training_folder)
 

@@ -3,6 +3,12 @@
     using test_train_split method with stratify parameter
     Dated : @8/20/2023
     Author : @Mahnoor Khan
+
+    image_path = "E:/DDI/DDI_Clean_Output/DDI_original/"
+    testing = "D:/MS Thesis/SkinLesionDetectionCode/Testing"
+    training = "D:/MS Thesis/SkinLesionDetectionCode/Training"
+    validation = "D:/MS Thesis/SkinLesionDetectionCode/Validation"
+    file_path = 'E:/DDI/ddi_metadata.csv'
 """
 
 from sklearn.model_selection import StratifiedShuffleSplit
@@ -19,10 +25,10 @@ def saveimages(test_images, original_image_path, test_dir):
 
 
 def stratify(filePath):
-    image_path = "E:/DDI/DDI_Clean_Output/DDI_original/"
-    testing = "D:/MS Thesis/SkinLesionDetectionCode/Testing"
-    training = "D:/MS Thesis/SkinLesionDetectionCode/Training"
-    validation = "D:/MS Thesis/SkinLesionDetectionCode/Validation"
+    image_path = "D:/SkinLesionClassification/DDI_Clean_Output/MedianFilteredImages"
+    testing = "D:/SkinLesionClassification/Testing"
+    training = "D:/SkinLesionClassification/Training"
+    validation = "D:/SkinLesionClassification/Validation"
 
     data = pd.read_csv(filePath)
     X = data.drop("malignant", axis=1)
@@ -48,7 +54,7 @@ def stratify(filePath):
     saveimages(X_train, image_path, training)
 
 def main():
-    file_path = 'E:/DDI/ddi_metadata.csv'
+    file_path = 'D:/SkinLesionClassification/ddi_metadata.csv'
     stratify(file_path)
 
 

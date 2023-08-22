@@ -4,6 +4,21 @@
     using keras preprocessing image
     Dated : @8/16/2023
     Author : @Mahnoor Khan
+
+    folder_path_benign = [
+        "D:/MS Thesis/SkinLesionDetectionCode/Benign/Black/*.png",
+        "D:/MS Thesis/SkinLesionDetectionCode/Benign/Brown/*.png",
+        "D:/MS Thesis/SkinLesionDetectionCode/Benign/White/*.png"
+    ]
+
+    folder_path_malignant = [
+        "D:/MS Thesis/SkinLesionDetectionCode/Malignant/Black/*.png",
+        "D:/MS Thesis/SkinLesionDetectionCode/Malignant/Brown/*.png",
+        "D:/MS Thesis/SkinLesionDetectionCode/Malignant/White/*.png"
+    ]
+
+    output_path_benign = "D:/MS Thesis/SkinLesionDetectionCode/Benign/"
+    output_path_malignant = "D:/MS Thesis/SkinLesionDetectionCode/Malignant/"
 """
 
 from keras.preprocessing.image import ImageDataGenerator
@@ -32,19 +47,19 @@ def augment(folderPath, outputPath, iteration):
 
 def main():
     folder_path_benign = [
-        "D:/MS Thesis/SkinLesionDetectionCode/Benign/Black/*.png",
-        "D:/MS Thesis/SkinLesionDetectionCode/Benign/Brown/*.png",
-        "D:/MS Thesis/SkinLesionDetectionCode/Benign/White/*.png"
+        "D:/SkinLesionClassification/Augmentation/Benign/Black/*.png",
+        "D:/SkinLesionClassification/Augmentation/Benign/Brown/*.png",
+        "D:/SkinLesionClassification/Augmentation/Benign/White/*.png"
     ]
 
     folder_path_malignant = [
-        "D:/MS Thesis/SkinLesionDetectionCode/Malignant/Black/*.png",
-        "D:/MS Thesis/SkinLesionDetectionCode/Malignant/Brown/*.png",
-        "D:/MS Thesis/SkinLesionDetectionCode/Malignant/White/*.png"
+        "D:/SkinLesionClassification/Augmentation/Malignant/Black/*.png",
+        "D:/SkinLesionClassification/Augmentation/Malignant/Brown/*.png",
+        "D:/SkinLesionClassification/Augmentation/Malignant/White/*.png"
     ]
 
-    output_path_benign = "D:/MS Thesis/SkinLesionDetectionCode/Benign/"
-    output_path_malignant = "D:/MS Thesis/SkinLesionDetectionCode/Malignant/"
+    output_path_benign = "D:/SkinLesionClassification/TrainingDS/benign/"
+    output_path_malignant = "D:/SkinLesionClassification/TrainingDS/malignant/"
 
     for folderPath in folder_path_benign:
         augment(folderPath, output_path_benign, 1)
