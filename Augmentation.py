@@ -4,25 +4,10 @@
     using keras preprocessing image
     Dated : @8/16/2023
     Author : @Mahnoor Khan
-
-    folder_path_benign = [
-        "D:/MS Thesis/SkinLesionDetectionCode/Benign/Black/*.png",
-        "D:/MS Thesis/SkinLesionDetectionCode/Benign/Brown/*.png",
-        "D:/MS Thesis/SkinLesionDetectionCode/Benign/White/*.png"
-    ]
-
-    folder_path_malignant = [
-        "D:/MS Thesis/SkinLesionDetectionCode/Malignant/Black/*.png",
-        "D:/MS Thesis/SkinLesionDetectionCode/Malignant/Brown/*.png",
-        "D:/MS Thesis/SkinLesionDetectionCode/Malignant/White/*.png"
-    ]
-
-    output_path_benign = "D:/MS Thesis/SkinLesionDetectionCode/Benign/"
-    output_path_malignant = "D:/MS Thesis/SkinLesionDetectionCode/Malignant/"
 """
 
 from keras.preprocessing.image import ImageDataGenerator
-from keras.utils.image_utils import load_img, img_to_array, save_img
+from keras.utils.image_utils import load_img, img_to_array
 import glob
 
 
@@ -65,7 +50,7 @@ def main():
         augment(folderPath, output_path_benign, 1)
 
     for folderPath in folder_path_malignant:
-        augment(folderPath, output_path_malignant, 7)
+        augment(folderPath, output_path_malignant, 5)
 
 
 if __name__ == '__main__':
