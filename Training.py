@@ -20,6 +20,17 @@ from sklearn.metrics import precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, roc_auc_score
 
 
+def print_data(data):
+    print(data)
+    print(data.params)
+    print(data.history.keys())
+    print(data.history['loss'][:10]) #loss of first 10 epochs
+    print(data.history['accuracy'])
+    print(data.history['val_accuracy'])
+    print(data.history['loss'])
+    print(data.history['val_loss'])
+
+
 def initialize_training_dataset(data_path, IMAGE_SIZE, BATCH_SIZE):
     dataset = tf.keras.preprocessing.image_dataset_from_directory(data_path, seed=123, shuffle=True,
                                                                   image_size=(IMAGE_SIZE, IMAGE_SIZE),
@@ -68,9 +79,11 @@ def cache_shuffle_prefetch(trainDS, testDS, validationDS):
 
     return train_ds, test_ds, val_ds,
 
-def build_model(trainDS,input_shape,no_classes):
+
+def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epochs):
     model = models.Sequential([
-        layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape[1:], data_format="channels_last"),
+        layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape[1:],
+                      data_format="channels_last"),
         layers.MaxPooling2D((2, 2)),
         layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
         layers.MaxPooling2D((2, 2)),
@@ -88,6 +101,15 @@ def build_model(trainDS,input_shape,no_classes):
     ])
     model.build()
     model.summary()
+    model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False))
+    history = model.fit(
+        trainDS,
+        batch_size=batch_size,
+        validation_data=validationDS,
+        verbose=1,
+        epochs=epochs
+    )
+    return history
 
 
 def main():
@@ -112,7 +134,8 @@ def main():
 
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
-    build_model(trainDS,input_shape,classes)
+    history = build_model(trainDS, input_shape, classes,BATCH_SIZE,validationDS,EPOCHS)
+    print_data(history)
 
 
 if __name__ == "__main__":
