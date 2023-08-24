@@ -12,6 +12,7 @@
 
 import tensorflow as tf
 from keras import models, layers
+# from tensorflow.keras import models, layers
 import matplotlib.pyplot as plt
 from IPython.display import HTML
 import numpy as np
@@ -67,10 +68,31 @@ def cache_shuffle_prefetch(trainDS, testDS, validationDS):
 
     return train_ds, test_ds, val_ds,
 
+def build_model(trainDS,input_shape,no_classes):
+    model = models.Sequential([
+        layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape[1:], data_format="channels_last"),
+        layers.MaxPooling2D((2, 2)),
+        layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        layers.Flatten(),
+        layers.Dense(64, activation='relu'),
+        layers.Dense(no_classes, activation='softmax'),
+    ])
+    model.build()
+    model.summary()
+
 
 def main():
     BATCH_SIZE = 32
-    IMAGE_SIZE = 224
+    IMAGE_SIZE = 244
     CHANNELS = 3
     EPOCHS = 100
 
@@ -87,6 +109,10 @@ def main():
     essential_info(training_dataset, testing_dataset, validation_dataset)
 
     trainDS, testDS, validationDS = cache_shuffle_prefetch(training_dataset, testing_dataset, validation_dataset)
+
+    input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
+    classes = 2
+    build_model(trainDS,input_shape,classes)
 
 
 if __name__ == "__main__":
