@@ -9,6 +9,8 @@
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils.image_utils import load_img, img_to_array
 import glob
+import shutil
+import csv
 
 
 def augment(folderPath, outputPath, iteration):
@@ -30,6 +32,43 @@ def augment(folderPath, outputPath, iteration):
                 break
 
 
+def save_to_folder(image_name, csv_file, output_benign, output_malignant, subfolder_path):
+    csv_file = csv.reader(open(csv_file, "r"), delimiter=",")
+    for row in csv_file:
+        if row[2] == image_name and row[3] == '56' and row[4] == 'TRUE':
+            source_file_path = subfolder_path + "/" + image_name
+            shutil.copy(source_file_path, output_malignant)
+        if row[2] == image_name and row[3] == '56' and row[4] == 'FALSE':
+            source_file_path = subfolder_path + "/" + image_name
+            shutil.copy(source_file_path, output_benign)
+        if row[2] == image_name and row[3] == '34' and row[4] == 'TRUE':
+            source_file_path = subfolder_path + "/" + image_name
+            shutil.copy(source_file_path, output_malignant)
+        if row[2] == image_name and row[3] == '34' and row[4] == 'FALSE':
+            source_file_path = subfolder_path + "/" + image_name
+            shutil.copy(source_file_path, output_benign)
+        if row[2] == image_name and row[3] == '12' and row[4] == 'TRUE':
+            source_file_path = subfolder_path + "/" + image_name
+            shutil.copy(source_file_path, output_malignant)
+        if row[2] == image_name and row[3] == '12' and row[4] == 'FALSE':
+            source_file_path = subfolder_path + "/" + image_name
+            shutil.copy(source_file_path, output_benign)
+
+
+def copy_original_to_augmentation_benign(benign, csv_path, output_benign, output_malignant):
+    for benign_subfolder in benign:
+        for filePath in glob.glob(benign_subfolder+"/*.png"):
+            filename = filePath.partition("\\")[2]
+            save_to_folder(filename, csv_path, output_benign, output_malignant, benign_subfolder)
+
+
+def copy_original_to_augmentation_malignant(malignant, csv_path, output_benign, output_malignant):
+    for malignant_subfolder in malignant:
+        for filePath in glob.glob(malignant_subfolder+"/*.png"):
+            filename = filePath.partition("\\")[2]
+            save_to_folder(filename, csv_path, output_benign, output_malignant, malignant_subfolder)
+
+
 def main():
     folder_path_benign = [
         "D:/SkinLesionClassification/Augmentation/Benign/Black/*.png",
@@ -43,14 +82,30 @@ def main():
         "D:/SkinLesionClassification/Augmentation/Malignant/White/*.png"
     ]
 
+    folder_benign = [
+        "D:/SkinLesionClassification/Augmentation/Benign/Black",
+        "D:/SkinLesionClassification/Augmentation/Benign/Brown",
+        "D:/SkinLesionClassification/Augmentation/Benign/White"
+    ]
+
+    folder_malignant = [
+        "D:/SkinLesionClassification/Augmentation/Malignant/Black",
+        "D:/SkinLesionClassification/Augmentation/Malignant/Brown",
+        "D:/SkinLesionClassification/Augmentation/Malignant/White"
+    ]
+
     output_path_benign = "D:/SkinLesionClassification/TrainingDS/benign/"
     output_path_malignant = "D:/SkinLesionClassification/TrainingDS/malignant/"
+    csv_path = "D:/SkinLesionClassification/ddi_metadata.csv"
 
     for folderPath in folder_path_benign:
         augment(folderPath, output_path_benign, 1)
 
     for folderPath in folder_path_malignant:
         augment(folderPath, output_path_malignant, 5)
+
+    copy_original_to_augmentation_malignant(folder_malignant, csv_path, output_path_benign, output_path_malignant)
+    copy_original_to_augmentation_benign(folder_benign, csv_path, output_path_benign, output_path_malignant)
 
 
 if __name__ == '__main__':

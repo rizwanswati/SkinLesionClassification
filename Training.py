@@ -112,6 +112,10 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
     return history
 
 
+def shuffle_training_data(trainDS):
+    return trainDS.shuffle(10000,seed=100)
+
+
 def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 244
@@ -131,6 +135,7 @@ def main():
     essential_info(training_dataset, testing_dataset, validation_dataset)
 
     trainDS, testDS, validationDS = cache_shuffle_prefetch(training_dataset, testing_dataset, validation_dataset)
+    trainDS = shuffle_training_data(trainDS)
 
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
