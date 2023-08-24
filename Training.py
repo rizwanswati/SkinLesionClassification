@@ -34,6 +34,15 @@ def print_image_label_batch(dataset):
         print(label_batch.numpy())
 
 
+def visiualize_images(dataset, class_names):
+    for image_batch, labels_batch in dataset.take(1):
+        for i in range(12):
+            ax = plt.subplot(3, 4, i + 1)
+            plt.imshow(image_batch[i].numpy().astype("uint8"))
+            plt.title(class_names[labels_batch[i]])
+            plt.axis("off")
+
+
 def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 224
@@ -43,6 +52,7 @@ def main():
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     dataset = initialize_data(dataset_path, IMAGE_SIZE, BATCH_SIZE)
     print_image_label_batch(dataset)
+    visiualize_images(dataset, dataset.class_names)
 
 
 if __name__ == "__main__":
