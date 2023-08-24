@@ -24,7 +24,14 @@ def initialize_data(data_path, IMAGE_SIZE, BATCH_SIZE):
                                                                   image_size=(IMAGE_SIZE, IMAGE_SIZE),
                                                                   batch_size=BATCH_SIZE
                                                                   )
+    print(dataset.class_names)
     return dataset
+
+
+def print_image_label_batch(dataset):
+    for image_batch, label_batch in dataset:
+        print(image_batch.shape)
+        print(label_batch.numpy())
 
 
 def main():
@@ -35,7 +42,7 @@ def main():
 
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     dataset = initialize_data(dataset_path, IMAGE_SIZE, BATCH_SIZE)
-    print(dataset.class_names)
+    print_image_label_batch(dataset)
 
 
 if __name__ == "__main__":
