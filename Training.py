@@ -24,7 +24,7 @@ def print_data(data):
     print(data)
     print(data.params)
     print(data.history.keys())
-    print(data.history['loss'][:10]) #loss of first 10 epochs
+    print(data.history['loss'][:10])  # loss of first 10 epochs
     print(data.history['accuracy'])
     print(data.history['val_accuracy'])
     print(data.history['loss'])
@@ -80,10 +80,23 @@ def cache_shuffle_prefetch(trainDS, testDS, validationDS):
     return train_ds, test_ds, val_ds,
 
 
-def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epochs):
+def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epochs, IMAGE_SIZE):
+    resize_and_rescale = tf.keras.Sequential([
+        layers.Resizing(IMAGE_SIZE, IMAGE_SIZE),
+        layers.Rescaling(1. / 244),
+    ])
+
+    data_augmentation = tf.keras.Sequential([
+        layers.RandomFlip("horizontal_and_vertical"),
+        layers.RandomRotation(0.2),
+    ])
+    train_dataset = trainDS.map(
+        lambda x, y: (data_augmentation(x, training=True), y)
+    ).prefetch(buffer_size=tf.data.AUTOTUNE)
+
     model = models.Sequential([
-        layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape[1:],
-                      data_format="channels_last"),
+        resize_and_rescale,
+        layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape[1:]),
         layers.MaxPooling2D((2, 2)),
         layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
         layers.MaxPooling2D((2, 2)),
@@ -99,11 +112,11 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
         layers.Dense(64, activation='relu'),
         layers.Dense(no_classes, activation='softmax'),
     ])
-    model.build()
+    model.build(input_shape=input_shape)
     model.summary()
     model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False))
     history = model.fit(
-        trainDS,
+        train_dataset,
         batch_size=batch_size,
         validation_data=validationDS,
         verbose=1,
@@ -113,7 +126,7 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
 
 
 def shuffle_training_data(trainDS):
-    return trainDS.shuffle(10000,seed=100)
+    return trainDS.shuffle(10000, seed=100)
 
 
 def main():
@@ -139,7 +152,7 @@ def main():
 
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
-    history = build_model(trainDS, input_shape, classes,BATCH_SIZE,validationDS,EPOCHS)
+    history = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
     print_data(history)
 
 
