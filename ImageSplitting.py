@@ -56,8 +56,8 @@ def split_validation_test_images(input_image_folder, output_benign, output_malig
 def main():
     output_path_benign = "D:/SkinLesionClassification/Augmentation/Benign/"
     output_path_malignant = "D:/SkinLesionClassification/Augmentation/Malignant/"
-    valid_benign = "D:/SkinLesionClassification/Validation/Benign"
-    valid_malignant = "D:/SkinLesionClassification/Validation/Malignant"
+    valid_benign = "D:/SkinLesionClassification/Validation/benign"
+    valid_malignant = "D:/SkinLesionClassification/Validation/malignant"
     training_folder_path = "D:/SkinLesionClassification/Training/*.png"
     training_folder = "D:/SkinLesionClassification/Training/"
     valid_folder_path = "D:/SkinLesionClassification/Validation/*.png"
