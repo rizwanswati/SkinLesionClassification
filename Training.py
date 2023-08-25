@@ -32,15 +32,23 @@ def print_data(data):
 
 
 def initialize_training_dataset(data_path, IMAGE_SIZE, BATCH_SIZE):
-    dataset = tf.keras.preprocessing.image_dataset_from_directory(data_path, seed=123, shuffle=True,
+    dataset = tf.keras.preprocessing.image_dataset_from_directory(data_path, labels="inferred", seed=123, shuffle=True,
                                                                   image_size=(IMAGE_SIZE, IMAGE_SIZE),
                                                                   batch_size=BATCH_SIZE
                                                                   )
     return dataset
 
 
-def initialize_dataset(data_path, IMAGE_SIZE, BATCH_SIZE):
-    dataset = tf.keras.preprocessing.image_dataset_from_directory(data_path, labels=None, seed=123, shuffle=True,
+def initialize_validation_dataset(data_path, IMAGE_SIZE, BATCH_SIZE):
+    dataset = tf.keras.preprocessing.image_dataset_from_directory(data_path, labels="inferred", seed=123, shuffle=True,
+                                                                  image_size=(IMAGE_SIZE, IMAGE_SIZE),
+                                                                  batch_size=BATCH_SIZE
+                                                                  )
+    return dataset
+
+
+def initialize_testing_dataset(data_path, IMAGE_SIZE, BATCH_SIZE):
+    dataset = tf.keras.preprocessing.image_dataset_from_directory(data_path, labels="inferred", seed=123, shuffle=True,
                                                                   image_size=(IMAGE_SIZE, IMAGE_SIZE),
                                                                   batch_size=BATCH_SIZE
                                                                   )
@@ -119,7 +127,7 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
         train_dataset,
         batch_size=batch_size,
         validation_data=validationDS,
-        verbose=1,
+        verbose="auto",
         epochs=epochs
     )
     return history
@@ -136,12 +144,12 @@ def main():
     EPOCHS = 100
 
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
-    testing_dataset_path = "D:/SkinLesionClassification/Testing/"
+    testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
 
     training_dataset = initialize_training_dataset(dataset_path, IMAGE_SIZE, BATCH_SIZE)
-    testing_dataset = initialize_dataset(testing_dataset_path, IMAGE_SIZE, BATCH_SIZE)
-    validation_dataset = initialize_dataset(validation_dataset_path, IMAGE_SIZE, BATCH_SIZE)
+    testing_dataset = initialize_testing_dataset(testing_dataset_path, IMAGE_SIZE, BATCH_SIZE)
+    validation_dataset = initialize_validation_dataset(validation_dataset_path, IMAGE_SIZE, BATCH_SIZE)
 
     print_image_label_batch(training_dataset)
     visiualize_images(training_dataset, training_dataset.class_names)
