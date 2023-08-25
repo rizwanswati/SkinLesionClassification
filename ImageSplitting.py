@@ -58,15 +58,19 @@ def main():
     output_path_malignant = "D:/SkinLesionClassification/Augmentation/Malignant/"
     valid_benign = "D:/SkinLesionClassification/Validation/benign"
     valid_malignant = "D:/SkinLesionClassification/Validation/malignant"
+    test_benign = "D:/SkinLesionClassification/Testing/benign"
+    test_malignant = "D:/SkinLesionClassification/Testing/malignant"
     training_folder_path = "D:/SkinLesionClassification/Training/*.png"
     training_folder = "D:/SkinLesionClassification/Training/"
     valid_folder_path = "D:/SkinLesionClassification/Validation/*.png"
     valid_folder = "D:/SkinLesionClassification/Validation/"
+    test_folder_path = "D:/SkinLesionClassification/Testing/*.png"
+    test_folder = "D:/SkinLesionClassification/Testing/"
     class_file_path = "D:/SkinLesionClassification/ddi_metadata.csv"
 
     split_images(training_folder_path, output_path_benign, output_path_malignant, class_file_path, training_folder)
     split_validation_test_images(valid_folder_path, valid_benign, valid_malignant, class_file_path, valid_folder)
-
+    split_validation_test_images(test_folder_path, test_benign, test_malignant, class_file_path, test_folder)
 
 if __name__ == "__main__":
     main()
