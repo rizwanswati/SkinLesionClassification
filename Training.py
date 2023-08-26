@@ -63,7 +63,7 @@ def print_image_label_batch(dataset):
         print(label_batch.numpy())
 
 
-def visiualize_images(dataset, class_names):
+def visualize_images(dataset, class_names):
     for image_batch, labels_batch in dataset.take(1):
         for i in range(12):
             ax = plt.subplot(3, 4, i + 1)
@@ -157,7 +157,7 @@ def main():
     validation_dataset = initialize_validation_dataset(validation_dataset_path, IMAGE_SIZE, BATCH_SIZE)
 
     print_image_label_batch(training_dataset)
-    visiualize_images(training_dataset, training_dataset.class_names)
+    visualize_images(training_dataset, training_dataset.class_names)
     essential_info(training_dataset, testing_dataset, validation_dataset)
 
     trainDS, testDS, validationDS = cache_shuffle_prefetch(training_dataset, testing_dataset, validation_dataset)
