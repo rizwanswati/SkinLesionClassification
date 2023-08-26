@@ -18,6 +18,8 @@ from IPython.display import HTML
 import numpy as np
 from sklearn.metrics import precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, roc_auc_score
+from keras.optimizers import Adam
+
 
 
 def print_data(data):
@@ -117,18 +119,24 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
         layers.Conv2D(64, (3, 3), activation='relu'),
         layers.MaxPooling2D((2, 2)),
         layers.Flatten(),
+        layers.Dropout(0.3),
         layers.Dense(64, activation='relu'),
+        layers.Dropout(0.3),
         layers.Dense(no_classes, activation='softmax'),
     ])
+    opt = Adam(learning_rate=0.001)
     model.build(input_shape=input_shape)
     model.summary()
-    model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False))
+    model.compile(optimizer=opt, loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+                  metrics=['accuracy'])
     history = model.fit(
         train_dataset,
         batch_size=batch_size,
         validation_data=validationDS,
         verbose="auto",
-        epochs=epochs
+        epochs=epochs,
+        use_multiprocessing= True
+
     )
     return history
 
@@ -141,7 +149,7 @@ def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 244
     CHANNELS = 3
-    EPOCHS = 100
+    EPOCHS = 49
 
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
