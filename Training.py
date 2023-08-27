@@ -34,6 +34,27 @@ def print_data(data):
     print(data.history['val_loss'])
 
 
+def PlotData(history, EPOCHS):
+    acc = history.history['accuracy']
+    val_acc = history.history['val_accuracy']
+    loss = history.history['loss']
+    val_loss = history.history['val_loss']
+
+    plt.figure(figsize=(8, 3))
+    plt.subplot(1, 2, 1)
+    plt.plot(range(EPOCHS), acc, label='Training Accuracy')
+    plt.plot(range(EPOCHS), val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.title('Training and Validation Accuracy')
+
+    plt.subplot(1, 2, 2)
+    plt.plot(range(EPOCHS), loss, label='Training Loss')
+    plt.plot(range(EPOCHS), val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+    plt.show()
+
+
 def initialize_training_dataset(data_path, IMAGE_SIZE, BATCH_SIZE):
     dataset = tf.keras.preprocessing.image_dataset_from_directory(data_path, labels="inferred", seed=123, shuffle=True,
                                                                   image_size=(IMAGE_SIZE, IMAGE_SIZE),
@@ -120,6 +141,7 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
         layers.Conv2D(64, (3, 3), activation='relu'),
         layers.MaxPooling2D((2, 2)),
         layers.Flatten(),
+        layers.Dropout(0.3),
         layers.Dense(64, activation='relu'),
         layers.Dense(no_classes, activation='softmax'),
     ])
@@ -151,7 +173,7 @@ def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 244
     CHANNELS = 3
-    EPOCHS = 38
+    EPOCHS = 10
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
@@ -171,6 +193,7 @@ def main():
     classes = 2
     history = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
     print_data(history)
+    PlotData(history, EPOCHS)
 
 
 if __name__ == "__main__":
