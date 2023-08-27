@@ -5,21 +5,22 @@
     @:var EPOCHS_SIZE =
     @:var BATCH_SIZE =
     @:var NO_OF_LAYERS =
-
+    Optimal model values at EPOCH: 34
+    Highest model accuracies at EPOCH: 60/65
     Creation date: August 22, 2023
     Author: @Mahnoor Khan
 """
-
+import h5py
 import tensorflow as tf
 from keras import models, layers
 # from tensorflow.keras import models, layers
 import matplotlib.pyplot as plt
 from IPython.display import HTML
 import numpy as np
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.metrics import precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, roc_auc_score
 from keras.optimizers import Adam
-
 
 
 def print_data(data):
@@ -130,9 +131,13 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
         train_dataset,
         batch_size=batch_size,
         validation_data=validationDS,
+        callbacks=[EarlyStopping(monitor='val_loss', verbose=1, patience=50), ModelCheckpoint(
+            filepath='D:/SkinLesionClassification/skin_lesion.h5',
+            monitor='val_loss',
+            save_best_only=True)],
         verbose="auto",
         epochs=epochs,
-        use_multiprocessing= True
+        use_multiprocessing=True
 
     )
     return history
@@ -146,8 +151,7 @@ def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 244
     CHANNELS = 3
-    EPOCHS = 49
-
+    EPOCHS = 38
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
