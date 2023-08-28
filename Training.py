@@ -34,6 +34,71 @@ def print_data(data):
     print(data.history['val_loss'])
 
 
+def precision_recall_and_f1score(model, test_ds):
+    test_images = []
+    test_labels = []
+    predicted_labels = []
+    class_names = test_ds.class_names
+
+    for images_batch, labels_batch in test_ds:
+        test_images.extend(images_batch.numpy())
+        test_labels.extend(labels_batch.numpy())
+        batch_prediction = model.predict(images_batch)
+        predicted_labels.extend(np.argmax(batch_prediction, axis=1))
+
+    test_labels = np.array(test_labels)
+    predicted_labels = np.array(predicted_labels)
+
+    precision = precision_score(test_labels, predicted_labels, average=None)
+    recall = recall_score(test_labels, predicted_labels, average=None)
+    f1 = f1_score(test_labels, predicted_labels, average=None)
+
+    # Plotting the metrics
+    plt.figure(figsize=(10, 6))
+    x = np.arange(len(class_names))
+
+    plt.bar(x - 0.2, precision, width=0.2, label='Precision')
+    plt.bar(x, recall, width=0.2, label='Recall')
+    plt.bar(x + 0.2, f1, width=0.2, label='F1 Score')
+
+    plt.xticks(x, class_names, rotation=45)
+    plt.xlabel('Skin Lesion Classification')
+    plt.ylabel('Score')
+    plt.title('Precision, Recall, and F1 Score')
+    plt.legend()
+    plt.show()
+
+
+def roc_auc_plot(model, testDS):
+    test_images = []
+    test_labels = []
+    predicted_probabilities = []
+
+    for images_batch, labels_batch in testDS:
+        test_images.extend(images_batch.numpy())
+        test_labels.extend(labels_batch.numpy())
+        batch_prediction = model.predict(images_batch)
+        predicted_probabilities.extend(batch_prediction)
+
+    test_labels = np.array(test_labels)
+    predicted_probabilities = np.array(predicted_probabilities)
+
+    # Calculate the ROC curve and AUC score
+    fpr, tpr, thresholds = roc_curve(test_labels, predicted_probabilities[:, 1])
+    auc_score = roc_auc_score(test_labels, predicted_probabilities[:, 1])
+
+    # Plot the ROC curve
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, label='ROC Curve (AUC = {:.2f})'.format(auc_score))
+    plt.plot([0, 1], [0, 1], 'k--')  # Diagonal line
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC) Curve')
+    plt.legend()
+    plt.show()
+    print('AUC Score:', auc_score)
+
+
 def PlotData(history, EPOCHS):
     acc = history.history['accuracy']
     val_acc = history.history['val_accuracy']
@@ -52,6 +117,71 @@ def PlotData(history, EPOCHS):
     plt.plot(range(EPOCHS), val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
     plt.title('Training and Validation Loss')
+    plt.show()
+
+
+def prediction_on_sample_image(model, testDS):
+    for images_batch, labels_batch in testDS.take(1):
+        first_image = images_batch[0].numpy().astype('uint8')
+        first_label = labels_batch[0].numpy()
+
+        print("first image to predict")
+        plt.imshow(first_image)
+        firstLable = testDS.class_names[first_label]
+        print("actual label:", firstLable)
+
+        batch_prediction = model.predict(images_batch)
+        print("predicted label:", testDS.class_names[np.argmax(batch_prediction[0])])
+        plt.axis("off")
+        plt.show()
+
+
+def predict(model, image, classes):
+    image_array = tf.keras.preprocessing.image.img_to_array(image)
+    image_array = tf.expand_dims(image_array, 0)
+    prediction = model.predict(image_array)
+    predicted_class = classes[np.argmax(prediction[0])]
+    confidence = round(100 * (np.max(prediction[0])), 2)
+    return predicted_class, confidence
+
+
+def predict_on_multiple_images(model, test_ds):
+    plt.figure(figsize=(15, 15))
+    for images, labels in test_ds.take(1):
+        for i in range(9):
+            ax = plt.subplot(3, 3, i + 1)
+            plt.imshow(images[i].numpy().astype('uint8'))
+            classes = test_ds.class_names
+            predicted_class, confidence = predict(model, images[1].numpy(), classes)
+            actual_class = test_ds.class_names[labels[i]]
+            plt.title(f"Actual: {actual_class},\n Predicted: {predicted_class}. \n Confidence: {confidence}%")
+            plt.axis("off")
+    plt.show()
+
+
+def evaluate_show_score_plot(model, testDS, history):
+    scores = model.evaluate(testDS)
+    # Plotting the Accuracy Score
+    plt.figure(figsize=(6, 4))
+    plt.bar(["Accuracy"], [scores[1]], color='blue')
+    plt.ylim(0, 1)  # Set the y-axis limit from 0 to 1
+    plt.xlabel("Metrics")
+    plt.ylabel("Accuracy")
+    plt.title("Accuracy Score")
+    plt.show()
+
+    acc = history.history['accuracy']
+    val_acc = history.history['val_accuracy']
+
+    plt.figure(figsize=(8, 4))
+    metrics = ["Training Accuracy", "Validation Accuracy"]
+    accuracy_scores = [acc[-1], val_acc[-1]]
+
+    plt.bar(metrics, accuracy_scores, color=['blue', 'orange'])
+    plt.ylim(0, 1)  # Set the y-axis limit from 0 to 1
+    plt.xlabel("Metrics")
+    plt.ylabel("Accuracy")
+    plt.title("Accuracy Scores")
     plt.show()
 
 
@@ -162,7 +292,11 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
         use_multiprocessing=True
 
     )
-    return history
+    return history, model
+
+
+def save_model(model, path):
+    model.save(path + "/lesion_detection.h5")
 
 
 def shuffle_training_data(trainDS):
@@ -173,10 +307,11 @@ def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 244
     CHANNELS = 3
-    EPOCHS = 10
+    EPOCHS = 60
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
+    model_saving_path = "D:/SkinLesionClassification"
 
     training_dataset = initialize_training_dataset(dataset_path, IMAGE_SIZE, BATCH_SIZE)
     testing_dataset = initialize_testing_dataset(testing_dataset_path, IMAGE_SIZE, BATCH_SIZE)
@@ -191,9 +326,15 @@ def main():
 
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
-    history = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
+    history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
     print_data(history)
     PlotData(history, EPOCHS)
+    prediction_on_sample_image(model=model, testDS=testing_dataset)
+    predict_on_multiple_images(model, testing_dataset)
+    evaluate_show_score_plot(model, testing_dataset, history)
+    precision_recall_and_f1score(model, testing_dataset)
+    roc_auc_plot(model, testing_dataset)
+    save_model(model, model_saving_path)
 
 
 if __name__ == "__main__":
