@@ -21,6 +21,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.metrics import precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, roc_auc_score
 from keras.optimizers import Adam
+from sklearn.metrics import confusion_matrix
 
 
 def print_data(data):
@@ -49,19 +50,31 @@ def precision_recall_and_f1score(model, test_ds):
     test_labels = np.array(test_labels)
     predicted_labels = np.array(predicted_labels)
 
-    precision = precision_score(test_labels, predicted_labels, average=None)
-    recall = recall_score(test_labels, predicted_labels, average=None)
-    f1 = f1_score(test_labels, predicted_labels, average=None)
+    cm = confusion_matrix(test_labels, predicted_labels)
+    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    plt.title('Confusion Matrix')
+    plt.colorbar()
+    tick_marks = np.arange(len(class_names))
+    plt.xticks(tick_marks, class_names, rotation=55)
+    plt.yticks(tick_marks, class_names)
+
+    precision = precision_score(test_labels, predicted_labels, average='micro')
+    print("Precision:", precision)
+    recall = recall_score(test_labels, predicted_labels, average='micro')
+    print("Recall:", recall)
+    f1 = f1_score(test_labels, predicted_labels, average='micro')
+    print("F1-Score:", f1)
+    print("Confusion matrix:", cm)
 
     # Plotting the metrics
     plt.figure(figsize=(10, 6))
-    x = np.arange(len(class_names))
+    x = np.arange(1)
 
     plt.bar(x - 0.2, precision, width=0.2, label='Precision')
     plt.bar(x, recall, width=0.2, label='Recall')
     plt.bar(x + 0.2, f1, width=0.2, label='F1 Score')
 
-    plt.xticks(x, class_names, rotation=45)
+    plt.xticks(x, rotation=45)
     plt.xlabel('Skin Lesion Classification')
     plt.ylabel('Score')
     plt.title('Precision, Recall, and F1 Score')
@@ -105,17 +118,21 @@ def PlotData(history, EPOCHS):
     loss = history.history['loss']
     val_loss = history.history['val_loss']
 
-    plt.figure(figsize=(8, 3))
+    plt.figure(figsize=(20, 10))
     plt.subplot(1, 2, 1)
     plt.plot(range(EPOCHS), acc, label='Training Accuracy')
     plt.plot(range(EPOCHS), val_acc, label='Validation Accuracy')
     plt.legend(loc='lower right')
+    plt.xticks([5, 10, 15, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
+    plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
     plt.title('Training and Validation Accuracy')
 
     plt.subplot(1, 2, 2)
     plt.plot(range(EPOCHS), loss, label='Training Loss')
     plt.plot(range(EPOCHS), val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
+    plt.xticks([5, 10, 15, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
+    plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
     plt.title('Training and Validation Loss')
     plt.show()
 
@@ -277,16 +294,17 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
     ])
     model.build(input_shape=input_shape)
     model.summary()
-    model.compile(optimizer="adam", loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+    model.compile(optimizer=Adam(learning_rate=0.0005),
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
                   metrics=['accuracy'])
     history = model.fit(
         train_dataset,
         batch_size=batch_size,
         validation_data=validationDS,
-        callbacks=[EarlyStopping(monitor='val_loss', verbose=1, patience=50), ModelCheckpoint(
-            filepath='D:/SkinLesionClassification/skin_lesion.h5',
-            monitor='val_loss',
-            save_best_only=True)],
+        # callbacks=[EarlyStopping(monitor='val_loss', verbose=1, patience=50), ModelCheckpoint(
+        #  filepath='D:/SkinLesionClassification/skin_lesion.h5',
+        # monitor='val_loss',
+        # save_best_only=True)],
         verbose="auto",
         epochs=epochs,
         use_multiprocessing=True
@@ -296,7 +314,7 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
 
 
 def save_model(model, path):
-    model.save(path + "/lesion_detection.h5")
+    model.save(path + "/skin_lesion_detection.h5")
 
 
 def shuffle_training_data(trainDS):
@@ -307,7 +325,7 @@ def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 244
     CHANNELS = 3
-    EPOCHS = 60
+    EPOCHS = 5
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
@@ -329,8 +347,8 @@ def main():
     history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
     print_data(history)
     PlotData(history, EPOCHS)
-    prediction_on_sample_image(model=model, testDS=testing_dataset)
-    predict_on_multiple_images(model, testing_dataset)
+    # prediction_on_sample_image(model=model, testDS=testing_dataset)
+    # predict_on_multiple_images(model, testing_dataset)
     evaluate_show_score_plot(model, testing_dataset, history)
     precision_recall_and_f1score(model, testing_dataset)
     roc_auc_plot(model, testing_dataset)
