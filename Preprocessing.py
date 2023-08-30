@@ -24,8 +24,8 @@ def preprocess_image_dataset(ddi_clean, ddi_clean_output):
         # Convert the original image to grayscale
         grayScaleImage = cv2.cvtColor(src, cv2.COLOR_RGB2GRAY)
         # don't need to write output of every step but for proofreading lets do it anyway.
-        cv2.imwrite(ddi_clean_output + "GrayScales/" + filename, grayScaleImage,
-                    [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        #cv2.imwrite(ddi_clean_output + "GrayScales/" + filename, grayScaleImage,
+         #           [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
         # Kernel for the morphological filtering
         kernel = cv2.getStructuringElement(1, (17, 17))
@@ -33,14 +33,14 @@ def preprocess_image_dataset(ddi_clean, ddi_clean_output):
         # # Perform the blackHat filtering on the grayscale image to find the
         # # hair countours
         blackhatImage = cv2.morphologyEx(grayScaleImage, cv2.MORPH_BLACKHAT, kernel)
-        cv2.imwrite(ddi_clean_output + "BlackHatFiltered/" + filename, blackhatImage,
-                    [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        #cv2.imwrite(ddi_clean_output + "BlackHatFiltered/" + filename, blackhatImage,
+         #           [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
         # intensify the hair countours in preparation for the inpainting
         # algorithm
         ret, thresh2Image = cv2.threshold(blackhatImage, 10, 255, cv2.THRESH_BINARY)
-        cv2.imwrite(ddi_clean_output + "ThresholdIntensified/" + filename, thresh2Image,
-                    [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        #cv2.imwrite(ddi_clean_output + "ThresholdIntensified/" + filename, thresh2Image,
+         #           [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
         # # inpaint the original image depending on the mask
         inpaintedImage = cv2.inpaint(src, thresh2Image, 3, cv2.INPAINT_TELEA)
@@ -48,12 +48,12 @@ def preprocess_image_dataset(ddi_clean, ddi_clean_output):
                     [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
         # Blue color removal
-        blueImage = cv2.imread(ddi_clean_output + "Inpainted/" + filename)
+        """blueImage = cv2.imread(ddi_clean_output + "Inpainted/" + filename)
         hsv = cv2.cvtColor(blueImage, cv2.COLOR_BGR2HSV)
         lower_blue = np.array([100, 50, 50])
-        upper_blue = np.array([150, 255, 255])
+        upper_blue = np.array([150, 255, 255])"""
 
-        kernel = np.ones((3, 3), np.uint8)
+        """kernel = np.ones((3, 3), np.uint8)
         mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
         mask_blue2 = cv2.dilate(mask_blue, kernel, iterations=5)
         dst = cv2.inpaint(blueImage, mask_blue2, 3, cv2.INPAINT_TELEA)
@@ -88,13 +88,13 @@ def preprocess_image_dataset(ddi_clean, ddi_clean_output):
 
         imgForMedianFilter = Image.open(ddi_clean_output + "BlackMarkRemoved/" + filename)
         medianFilteredImage = imgForMedianFilter.filter(ImageFilter.MedianFilter(size=1))
-        medianFilteredImage.save(ddi_clean_output + "MedianFilteredImages/" + filename)
+        medianFilteredImage.save(ddi_clean_output + "MedianFilteredImages/" + filename)"""
 
 
 def main():
-    ddi_clean = "D:/SkinLesionClassification/DDI_Clean/*.png"
-    ddi_clean_output = "D:/SkinLesionClassification/DDI_Clean_Output/"
-    preprocess_image_dataset(ddi_clean, ddi_clean_output)
+    isic = "D:/SkinLesionClassification/ISIC/*.JPG"
+    isic_clean_output = "D:/SkinLesionClassification/ISIC_Clean_Output/"
+    preprocess_image_dataset(isic, isic_clean_output)
 
 
 if __name__ == '__main__':

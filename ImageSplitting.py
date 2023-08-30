@@ -33,10 +33,10 @@ def save_to_folder(image_name, csv_file, output_benign, output_malignant, traini
 def save_test_valid_images_to_folder(image_name, csv_file, output_benign, output_malignant, folder):
     csv_file = csv.reader(open(csv_file, "r"), delimiter=",")
     for row in csv_file:
-        if row[2] == image_name and row[4] == 'TRUE':
+        if row[0] == image_name and row[1] == 1:
             source_file_path = folder + "/" + image_name
             shutil.move(source_file_path, output_malignant)
-        if row[2] == image_name and row[4] == 'FALSE':
+        if row[0] == image_name and row[1] == 0:
             source_file_path = folder + "/" + image_name
             shutil.move(source_file_path, output_benign)
 
@@ -66,11 +66,16 @@ def main():
     valid_folder = "D:/SkinLesionClassification/Validation/"
     test_folder_path = "D:/SkinLesionClassification/Testing/*.png"
     test_folder = "D:/SkinLesionClassification/Testing/"
-    class_file_path = "D:/SkinLesionClassification/ddi_metadata.csv"
+    class_file_path = "D:/SkinLesionClassification/ISIC.csv"
+    ISIC_folder = "D:/SkinLesionClassification/ISIC/*.jpg"
+    ISIC_path = "D:/SkinLesionClassification/Validation/"
+    ISIC_benign = "D:/SkinLesionClassification/ISIC/Benign"
+    ISIC_malignant = "D:/SkinLesionClassification/ISIC/Malignant"
 
-    split_images(training_folder_path, output_path_benign, output_path_malignant, class_file_path, training_folder)
-    split_validation_test_images(valid_folder_path, valid_benign, valid_malignant, class_file_path, valid_folder)
-    split_validation_test_images(test_folder_path, test_benign, test_malignant, class_file_path, test_folder)
+    # split_images(training_folder_path, output_path_benign, output_path_malignant, class_file_path, training_folder)
+    split_validation_test_images(ISIC_folder, ISIC_benign, ISIC_malignant, class_file_path, ISIC_path)
+    # split_validation_test_images(test_folder_path, test_benign, test_malignant, class_file_path, test_folder)
+
 
 if __name__ == "__main__":
     main()

@@ -58,11 +58,11 @@ def precision_recall_and_f1score(model, test_ds):
     plt.xticks(tick_marks, class_names, rotation=55)
     plt.yticks(tick_marks, class_names)
 
-    precision = precision_score(test_labels, predicted_labels, average='micro')
+    precision = precision_score(test_labels, predicted_labels, average='weighted')
     print("Precision:", precision)
-    recall = recall_score(test_labels, predicted_labels, average='micro')
+    recall = recall_score(test_labels, predicted_labels, average='weighted')
     print("Recall:", recall)
-    f1 = f1_score(test_labels, predicted_labels, average='micro')
+    f1 = f1_score(test_labels, predicted_labels, average='weighted')
     print("F1-Score:", f1)
     print("Confusion matrix:", cm)
 
@@ -294,7 +294,7 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
     ])
     model.build(input_shape=input_shape)
     model.summary()
-    model.compile(optimizer=Adam(learning_rate=0.0005),
+    model.compile(optimizer=Adam(learning_rate=0.0004),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
                   metrics=['accuracy'])
     history = model.fit(
@@ -325,7 +325,7 @@ def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 244
     CHANNELS = 3
-    EPOCHS = 5
+    EPOCHS = 42
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
