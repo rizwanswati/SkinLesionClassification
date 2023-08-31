@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def preprocess_image(image_path):
@@ -18,6 +19,18 @@ def predict_image(image_path, model, class_names):
     predicted_class = class_names[predicted_class_index]
     confidence = round(100 * np.max(predictions[0]), 2)
     return predicted_class, confidence
+
+
+def evaluate_show_score_plot(model, testDS):
+    scores = model.evaluate(testDS)
+    # Plotting the Accuracy Score
+    plt.figure(figsize=(6, 4))
+    plt.bar(["Accuracy"], [scores[1]], color='blue')
+    plt.ylim(0, 1)  # Set the y-axis limit from 0 to 1
+    plt.xlabel("Metrics")
+    plt.ylabel("Accuracy")
+    plt.title("Accuracy Score")
+    plt.show()
 
 
 def main():

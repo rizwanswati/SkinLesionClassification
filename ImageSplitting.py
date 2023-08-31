@@ -33,10 +33,10 @@ def save_to_folder(image_name, csv_file, output_benign, output_malignant, traini
 def save_test_valid_images_to_folder(image_name, csv_file, output_benign, output_malignant, folder):
     csv_file = csv.reader(open(csv_file, "r"), delimiter=",")
     for row in csv_file:
-        if row[0] == image_name and row[1] == 1:
+        if row[3] == image_name and row[2] == 'TRUE':
             source_file_path = folder + "/" + image_name
             shutil.move(source_file_path, output_malignant)
-        if row[0] == image_name and row[1] == 0:
+        if row[3] == image_name and row[2] == 'FALSE':
             source_file_path = folder + "/" + image_name
             shutil.move(source_file_path, output_benign)
 
@@ -68,7 +68,7 @@ def main():
     test_folder = "D:/SkinLesionClassification/Testing/"
     class_file_path = "D:/SkinLesionClassification/ISIC.csv"
     ISIC_folder = "D:/SkinLesionClassification/ISIC/*.jpg"
-    ISIC_path = "D:/SkinLesionClassification/Validation/"
+    ISIC_path = "D:/SkinLesionClassification/ISIC"
     ISIC_benign = "D:/SkinLesionClassification/ISIC/Benign"
     ISIC_malignant = "D:/SkinLesionClassification/ISIC/Malignant"
 
