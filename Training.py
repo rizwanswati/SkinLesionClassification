@@ -56,7 +56,7 @@ def precision_recall_and_f1score(model, test_ds):
     test_labels = np.array(test_labels)
     predicted_labels = np.array(predicted_labels)
 
-    cm = confusion_matrix(test_labels, predicted_labels, labels=["Malignant", "Benign"])
+    # cm = confusion_matrix(test_labels, predicted_labels, labels=["Malignant", "Benign"])
     """plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
     plt.title('Confusion Matrix')
     plt.colorbar()
@@ -70,7 +70,6 @@ def precision_recall_and_f1score(model, test_ds):
     print("Recall:", recall)
     f1 = f1_score(test_labels, predicted_labels, average="binary")
     print("F1-Score:", f1)
-    print("Confusion matrix:", cm)
 
     # Plotting the metrics
     plt.figure(figsize=(10, 6))
@@ -322,7 +321,13 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
 
 def build_model_transfer_learning(model_tl, trainDS, input_shape, no_classes, batch_size, validationDS, epochs,
                                   IMAGE_SIZE):
-    model_tl.trainable = False
+    for i in range(100):
+        model_tl.layers[i].trainable = False
+
+    for k in range(100, 76):
+        model_tl.layers[k].trainable = True
+
+    print(model_tl.summary())
     model = models.Sequential([
         model_tl,
         layers.Flatten(),
