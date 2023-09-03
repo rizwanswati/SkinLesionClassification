@@ -50,21 +50,21 @@ def precision_recall_and_f1score(model, test_ds):
     test_labels = np.array(test_labels)
     predicted_labels = np.array(predicted_labels)
 
-    cm = confusion_matrix(test_labels, predicted_labels)
-    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    # cm = confusion_matrix(test_labels, predicted_labels)
+    """plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
     plt.title('Confusion Matrix')
     plt.colorbar()
     tick_marks = np.arange(len(class_names))
     plt.xticks(tick_marks, class_names, rotation=55)
-    plt.yticks(tick_marks, class_names)
+    plt.yticks(tick_marks, class_names)"""
 
-    precision = precision_score(test_labels, predicted_labels, average='micro')
+    precision = precision_score(test_labels, predicted_labels, average='weighted')
     print("Precision:", precision)
-    recall = recall_score(test_labels, predicted_labels, average='micro')
+    recall = recall_score(test_labels, predicted_labels, average='weighted')
     print("Recall:", recall)
-    f1 = f1_score(test_labels, predicted_labels, average='micro')
+    f1 = f1_score(test_labels, predicted_labels, average='weighted')
     print("F1-Score:", f1)
-    print("Confusion matrix:", cm)
+    # print("Confusion matrix:", cm)
 
     # Plotting the metrics
     plt.figure(figsize=(10, 6))
@@ -97,8 +97,8 @@ def roc_auc_plot(model, testDS):
     predicted_probabilities = np.array(predicted_probabilities)
 
     # Calculate the ROC curve and AUC score
-    fpr, tpr, thresholds = roc_curve(test_labels, predicted_probabilities[:, 1])
-    auc_score = roc_auc_score(test_labels, predicted_probabilities[:, 1])
+    fpr, tpr, thresholds = roc_curve(test_labels, predicted_probabilities[:])
+    auc_score = roc_auc_score(test_labels, predicted_probabilities[:])
 
     # Plot the ROC curve
     plt.figure(figsize=(8, 6))
@@ -118,12 +118,12 @@ def PlotData(history, EPOCHS):
     loss = history.history['loss']
     val_loss = history.history['val_loss']
 
-    plt.figure(figsize=(20, 10))
+    plt.figure(figsize=(15, 5))
     plt.subplot(1, 2, 1)
     plt.plot(range(EPOCHS), acc, label='Training Accuracy')
     plt.plot(range(EPOCHS), val_acc, label='Validation Accuracy')
     plt.legend(loc='lower right')
-    plt.xticks([5, 10, 15, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
+    plt.xticks([5, 10, 20, 30, 40, 50])
     plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
     plt.title('Training and Validation Accuracy')
 
@@ -131,7 +131,7 @@ def PlotData(history, EPOCHS):
     plt.plot(range(EPOCHS), loss, label='Training Loss')
     plt.plot(range(EPOCHS), val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
-    plt.xticks([5, 10, 15, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
+    plt.xticks([5, 10, 20, 30, 40, 50])
     plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
     plt.title('Training and Validation Loss')
     plt.show()
@@ -266,7 +266,7 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
     ])
 
     data_augmentation = tf.keras.Sequential([
-        layers.RandomFlip("horizontal_and_vertical"),
+        # layers.RandomFlip("horizontal_and_vertical"),
         layers.RandomRotation(0.2),
     ])
     train_dataset = trainDS.map(
@@ -288,15 +288,15 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
         layers.Conv2D(64, (3, 3), activation='relu'),
         layers.MaxPooling2D((2, 2)),
         layers.Flatten(),
-        layers.Dropout(0.3),
+        layers.Dropout(0.5),
         layers.Dense(64, activation='relu'),
-        layers.Dense(no_classes, activation='softmax'),
+        layers.Dense(2, activation='softmax'),
     ])
     model.build(input_shape=input_shape)
     model.summary()
-    model.compile(optimizer=Adam(learning_rate=0.0005),
+    model.compile(optimizer=Adam(learning_rate=0.0001),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
-                  metrics=['accuracy'])
+                  metrics=['accuracy'],)
     history = model.fit(
         train_dataset,
         batch_size=batch_size,
@@ -325,7 +325,7 @@ def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 244
     CHANNELS = 3
-    EPOCHS = 5
+    EPOCHS = 3
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
