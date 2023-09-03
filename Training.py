@@ -11,17 +11,22 @@
     Author: @Mahnoor Khan
 """
 import h5py
+import keras.models
 import tensorflow as tf
 from keras import models, layers
 # from tensorflow.keras import models, layers
 import matplotlib.pyplot as plt
-from IPython.display import HTML
 import numpy as np
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn import svm
+from sklearn.metrics import precision_score, recall_score, f1_score, classification_report
 from sklearn.metrics import roc_curve, roc_auc_score
 from keras.optimizers import Adam
 from sklearn.metrics import confusion_matrix
+import glob
+
+from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 
 
 def print_data(data):
@@ -296,7 +301,7 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
     model.summary()
     model.compile(optimizer=Adam(learning_rate=0.0001),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
-                  metrics=['accuracy'],)
+                  metrics=['accuracy'], )
     history = model.fit(
         train_dataset,
         batch_size=batch_size,
@@ -315,10 +320,82 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
 
 def save_model(model, path):
     model.save(path + "/skin_lesion_detection.h5")
+    return path + "/skin_lesion_detection.h5"
 
 
 def shuffle_training_data(trainDS):
     return trainDS.shuffle(10000, seed=100)
+
+
+def load_model(path):
+    model = tf.keras.models.load_model(path)
+    vector = model.get_layer("max_pooling2d_5").output
+    feature_extractor = tf.keras.Model(model.input, vector)
+    return feature_extractor, vector
+
+
+def feature_lable_extractor(feature_extractor, data_set_svm, classes):
+    X_list = []
+    Y_list = []
+    for label in classes:
+        if label == 'malignant':
+            f_lable = 1
+            print("malignant 1")
+        else:
+            f_lable = 0
+            print("benign 0")
+        folder_path = data_set_svm + "/" + label + "/*.png"
+        for filePath in glob.glob(folder_path):
+            filename = filePath.partition("\\")[2]
+            processed_img = preprocess_image(filePath)
+            extracted_feature_vector = feature_extractor.predict(processed_img)
+            X_list.append(extracted_feature_vector.ravel())
+            Y_list.append(f_lable)
+
+    X = np.asarray(X_list, dtype=np.float32)
+    Y = np.asarray(Y_list, dtype=np.float32)
+    return X, Y
+
+
+def preprocess_image(image_path):
+    image = tf.keras.preprocessing.image.load_img(
+        image_path, target_size=(244, 244)
+    )
+    image_array = tf.keras.preprocessing.image.img_to_array(image)
+    image_array = tf.expand_dims(image_array, 0)
+    return image_array
+
+
+def prepare_build_svm(X, Y,classes):
+    for s in range(100):
+        X, Y = shuffle(X, Y)
+
+    print("Shape of feature matrix X")
+    print(X.shape)
+    print("\nShape of label matrix Y")
+    print(Y.shape)
+
+    class_types, counts = np.unique(Y, return_counts=True)
+
+    print("\nClass labels")
+    print(class_types)
+    print("\nClass counts")
+    print(counts)
+
+    train_X, test_X, train_Y, test_Y = train_test_split(X, Y, test_size=0.2,
+                                                        stratify=Y,
+                                                        random_state=0)
+
+    print("Shape of train_X")
+    print(train_X.shape)
+    print("\nShape of test_X")
+    print(test_X.shape)
+
+    svm_lin = svm.SVC(C=1.0, kernel="linear")
+    svm_lin.fit(train_X, train_Y)
+    y_pred = svm_lin.predict(test_X)
+    print(classification_report(test_Y, y_pred,
+                                target_names=classes))
 
 
 def main():
@@ -347,12 +424,17 @@ def main():
     history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
     print_data(history)
     PlotData(history, EPOCHS)
-    # prediction_on_sample_image(model=model, testDS=testing_dataset)
-    # predict_on_multiple_images(model, testing_dataset)
+    prediction_on_sample_image(model=model, testDS=testing_dataset)
+    predict_on_multiple_images(model, testing_dataset)
     evaluate_show_score_plot(model, testing_dataset, history)
     precision_recall_and_f1score(model, testing_dataset)
     roc_auc_plot(model, testing_dataset)
-    save_model(model, model_saving_path)
+    model_path = save_model(model, model_saving_path)
+
+    # for SVM learning, change
+    feature_extractor, vector = load_model(model_path)
+    X,Y = feature_lable_extractor(feature_extractor, dataset_path, ['benign', 'malignant'])
+    prepare_build_svm(X,Y,['benign', 'malignant'])
 
 
 if __name__ == "__main__":
