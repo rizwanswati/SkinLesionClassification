@@ -264,72 +264,10 @@ def cache_shuffle_prefetch(trainDS, testDS, validationDS):
     return train_ds, test_ds, val_ds,
 
 
-def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epochs, IMAGE_SIZE):
-    resize_and_rescale = tf.keras.Sequential([
-        layers.Resizing(IMAGE_SIZE, IMAGE_SIZE),
-        layers.Rescaling(1. / 244),
-    ])
-
-    data_augmentation = tf.keras.Sequential([
-        layers.RandomFlip("horizontal_and_vertical"),
-        layers.RandomRotation(0.2),
-    ])
-    train_dataset = trainDS.map(
-        lambda x, y: (data_augmentation(x, training=True), y)
-    ).prefetch(buffer_size=tf.data.AUTOTUNE)
-
-    model = (models.Sequential([
-        resize_and_rescale,
-        layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape[1:]),
-        layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
-        layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
-        layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, (3, 3), activation='relu'),
-        layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, (3, 3), activation='relu'),
-        layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, (3, 3), activation='relu'),
-        layers.MaxPooling2D((2, 2)),
-        layers.Flatten(),
-        layers.Dropout(0.3),
-        layers.Dense(64, activation='relu'),
-        layers.Dense(no_classes, activation='softmax'),
-    ]))
-    model.build(input_shape=input_shape)
-    model.summary()
-    model.compile(optimizer=Adam(learning_rate=0.0005),
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
-                  metrics=['accuracy'])
-    history = model.fit(
-        # train_dataset,
-        trainDS,
-        batch_size=batch_size,
-        validation_data=validationDS,
-        # callbacks=[EarlyStopping(monitor='val_loss', verbose=1, patience=50), ModelCheckpoint(
-        #   filepath='D:/SkinLesionClassification/model_skin_lesion.h5',
-        #  monitor='val_loss',
-        #  save_best_only=True)],
-        verbose="auto",
-        epochs=epochs,
-        use_multiprocessing=True
-
-    )
-    return history, model
-
-
 def build_model_transfer_learning(model_tl, trainDS, input_shape, no_classes, batch_size, validationDS, epochs,
                                   IMAGE_SIZE):
     model_tl.include_top = False
 
-    for i in range(150):
-        model_tl.layers[i].trainable = False
-
-    for k in range(150, 175):
-        model_tl.layers[k].trainable = True
-
-    # print(model_tl.summary())
     model = models.Sequential([
         model_tl,
         layers.Flatten(),
@@ -366,24 +304,21 @@ def shuffle_training_data(trainDS):
     return trainDS.shuffle(10000, seed=100)
 
 
-def load_transfer_learning_model(model_path, model_json):
-    with open(model_json) as json_file:
-        model = model_from_json(json_file.read())
-        model.load_weights(model_path)
+def load_transfer_learning_model(model_path):
+    model = models.load_model(model_path)
     return model
 
 
 def main():
     BATCH_SIZE = 32
-    IMAGE_SIZE = 224
+    IMAGE_SIZE = 100
     CHANNELS = 3
     EPOCHS = 50
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
     model_saving_path = "D:/SkinLesionClassification"
-    model_path = "D:/SkinLesionClassification/resnet50.h5"
-    model_json = "D:/SkinLesionClassification/resnet.json"
+    model_path = "D:/SkinLesionClassification/model.h5"
 
     training_dataset = initialize_training_dataset(dataset_path, IMAGE_SIZE, BATCH_SIZE)
     testing_dataset = initialize_testing_dataset(testing_dataset_path, IMAGE_SIZE, BATCH_SIZE)
@@ -398,7 +333,7 @@ def main():
 
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
-    model_transfer_learning = load_transfer_learning_model(model_path, model_json)
+    model_transfer_learning = load_transfer_learning_model(model_path)
     # history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
     history, model = build_model_transfer_learning(model_transfer_learning, trainDS, input_shape, classes, BATCH_SIZE,
                                                    validationDS, EPOCHS, IMAGE_SIZE)
