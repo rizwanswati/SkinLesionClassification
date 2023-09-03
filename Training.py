@@ -402,7 +402,7 @@ def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 244
     CHANNELS = 3
-    EPOCHS = 3
+    EPOCHS = 50
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
@@ -412,16 +412,16 @@ def main():
     testing_dataset = initialize_testing_dataset(testing_dataset_path, IMAGE_SIZE, BATCH_SIZE)
     validation_dataset = initialize_validation_dataset(validation_dataset_path, IMAGE_SIZE, BATCH_SIZE)
 
-    print_image_label_batch(training_dataset)
+    """print_image_label_batch(training_dataset)
     visualize_images(training_dataset, training_dataset.class_names)
     essential_info(training_dataset, testing_dataset, validation_dataset)
 
     trainDS, testDS, validationDS = cache_shuffle_prefetch(training_dataset, testing_dataset, validation_dataset)
-    trainDS = shuffle_training_data(trainDS)
+    trainDS = shuffle_training_data(trainDS)"""
 
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
-    history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
+    """history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
     print_data(history)
     PlotData(history, EPOCHS)
     prediction_on_sample_image(model=model, testDS=testing_dataset)
@@ -429,9 +429,10 @@ def main():
     evaluate_show_score_plot(model, testing_dataset, history)
     precision_recall_and_f1score(model, testing_dataset)
     roc_auc_plot(model, testing_dataset)
-    model_path = save_model(model, model_saving_path)
+    model_path = save_model(model, model_saving_path)"""
 
     # for SVM learning, change
+    model_path = "D:/SkinLesionClassification/skin_lesion_detection.h5"
     feature_extractor, vector = load_model(model_path)
     X,Y = feature_lable_extractor(feature_extractor, dataset_path, ['benign', 'malignant'])
     prepare_build_svm(X,Y,['benign', 'malignant'])
