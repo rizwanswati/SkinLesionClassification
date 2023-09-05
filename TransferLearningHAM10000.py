@@ -45,6 +45,8 @@ def precision_recall_and_f1score(model, test_ds):
     test_images = []
     test_labels = []
     predicted_labels = []
+    predicted_probabilities = []
+
     class_names = test_ds.class_names
 
     for images_batch, labels_batch in test_ds:
@@ -52,17 +54,11 @@ def precision_recall_and_f1score(model, test_ds):
         test_labels.extend(labels_batch.numpy())
         batch_prediction = model.predict(images_batch)
         predicted_labels.extend(np.argmax(batch_prediction, axis=1))
+        predicted_probabilities.extend(batch_prediction)
 
     test_labels = np.array(test_labels)
     predicted_labels = np.array(predicted_labels)
-
-    # cm = confusion_matrix(test_labels, predicted_labels, labels=["Malignant", "Benign"])
-    """plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-    plt.title('Confusion Matrix')
-    plt.colorbar()
-    tick_marks = np.arange(len(class_names))
-    plt.xticks(tick_marks, class_names, rotation=55)
-    plt.yticks(tick_marks, class_names)"""
+    predicted_probabilities = np.array(predicted_probabilities)
 
     precision = precision_score(test_labels, predicted_labels, average='weighted')
     print("Precision:", precision)
@@ -70,6 +66,8 @@ def precision_recall_and_f1score(model, test_ds):
     print("Recall:", recall)
     f1 = f1_score(test_labels, predicted_labels, average='weighted')
     print("F1-Score:", f1)
+    fpr, tpr, thresholds = roc_curve(test_labels, predicted_probabilities[:, 1])
+    auc_score = roc_auc_score(test_labels, predicted_probabilities[:, 1])
 
     # Plotting the metrics
     plt.figure(figsize=(10, 6))
@@ -85,6 +83,17 @@ def precision_recall_and_f1score(model, test_ds):
     plt.title('Precision, Recall, and F1 Score')
     plt.legend()
     plt.show()
+
+    # Plot the ROC curve
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, label='ROC Curve (AUC = {:.2f})'.format(auc_score))
+    plt.plot([0, 1], [0, 1], 'k--')  # Diagonal line
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC) Curve')
+    plt.legend()
+    plt.show()
+    print('AUC Score:', auc_score)
 
 
 def roc_auc_plot(model, testDS):
@@ -136,8 +145,8 @@ def PlotData(history, EPOCHS):
     plt.plot(range(EPOCHS), loss, label='Training Loss')
     plt.plot(range(EPOCHS), val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
-    plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
     plt.xticks([5, 10, 15, 25, 30, 35, 40, 45, 50])
+    plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
     plt.title('Training and Validation Loss')
     plt.show()
 
@@ -268,6 +277,11 @@ def build_model_transfer_learning(model_tl, trainDS, input_shape, no_classes, ba
                                   IMAGE_SIZE):
     model_tl.include_top = False
 
+    for i in range(13):
+        model_tl.layers[i].trainable = False
+
+    for k in range(13, 18):
+        model_tl.layers[k].trainable = True
     model = models.Sequential([
         model_tl,
         layers.Flatten(),
@@ -297,7 +311,7 @@ def build_model_transfer_learning(model_tl, trainDS, input_shape, no_classes, ba
 
 
 def save_model(model, path):
-    model.save(path + "/Transfer_Learning.h5")
+    model.save(path + "/HAM10000_model.h5")
 
 
 def shuffle_training_data(trainDS):
@@ -318,7 +332,7 @@ def main():
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
     model_saving_path = "D:/SkinLesionClassification"
-    model_path = "D:/SkinLesionClassification/model.h5"
+    model_path = "D:/SkinLesionClassification/modelHAM.h5"
 
     training_dataset = initialize_training_dataset(dataset_path, IMAGE_SIZE, BATCH_SIZE)
     testing_dataset = initialize_testing_dataset(testing_dataset_path, IMAGE_SIZE, BATCH_SIZE)
@@ -343,7 +357,7 @@ def main():
     # predict_on_multiple_images(model, testing_dataset)
     evaluate_show_score_plot(model, testing_dataset, history)
     precision_recall_and_f1score(model, testing_dataset)
-    roc_auc_plot(model, testing_dataset)
+    # roc_auc_plot(model, testing_dataset)
     save_model(model, model_saving_path)
 
 

@@ -45,6 +45,7 @@ def precision_recall_and_f1score(model, test_ds):
     test_images = []
     test_labels = []
     predicted_labels = []
+    predicted_probabilities = []
     class_names = test_ds.class_names
 
     for images_batch, labels_batch in test_ds:
@@ -52,17 +53,11 @@ def precision_recall_and_f1score(model, test_ds):
         test_labels.extend(labels_batch.numpy())
         batch_prediction = model.predict(images_batch)
         predicted_labels.extend(np.argmax(batch_prediction, axis=1))
+        predicted_probabilities.extend(batch_prediction)
 
     test_labels = np.array(test_labels)
     predicted_labels = np.array(predicted_labels)
-
-    # cm = confusion_matrix(test_labels, predicted_labels, labels=["Malignant", "Benign"])
-    """plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-    plt.title('Confusion Matrix')
-    plt.colorbar()
-    tick_marks = np.arange(len(class_names))
-    plt.xticks(tick_marks, class_names, rotation=55)
-    plt.yticks(tick_marks, class_names)"""
+    predicted_probabilities = np.array(predicted_probabilities)
 
     precision = precision_score(test_labels, predicted_labels, average='weighted')
     print("Precision:", precision)
@@ -70,6 +65,8 @@ def precision_recall_and_f1score(model, test_ds):
     print("Recall:", recall)
     f1 = f1_score(test_labels, predicted_labels, average='weighted')
     print("F1-Score:", f1)
+    fpr, tpr, thresholds = roc_curve(test_labels, predicted_probabilities[:, 1])
+    auc_score = roc_auc_score(test_labels, predicted_probabilities[:, 1])
 
     # Plotting the metrics
     plt.figure(figsize=(10, 6))
@@ -85,6 +82,17 @@ def precision_recall_and_f1score(model, test_ds):
     plt.title('Precision, Recall, and F1 Score')
     plt.legend()
     plt.show()
+
+    # Plot the ROC curve
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, label='ROC Curve (AUC = {:.2f})'.format(auc_score))
+    plt.plot([0, 1], [0, 1], 'k--')  # Diagonal line
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC) Curve')
+    plt.legend()
+    plt.show()
+    print('AUC Score:', auc_score)
 
 
 def roc_auc_plot(model, testDS):
@@ -128,7 +136,7 @@ def PlotData(history, EPOCHS):
     plt.plot(range(EPOCHS), acc, label='Training Accuracy')
     plt.plot(range(EPOCHS), val_acc, label='Validation Accuracy')
     plt.legend(loc='lower right')
-    plt.xticks([5, 10, 15, 25, 30, 35, 40, 45, 50])
+    plt.xticks([5, 10, 15, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
     plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
     plt.title('Training and Validation Accuracy')
 
@@ -137,7 +145,7 @@ def PlotData(history, EPOCHS):
     plt.plot(range(EPOCHS), val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
     plt.yticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-    plt.xticks([5, 10, 15, 25, 30, 35, 40, 45, 50])
+    plt.xticks([5, 10, 15, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
     plt.title('Training and Validation Loss')
     plt.show()
 
@@ -293,13 +301,15 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
         layers.Conv2D(64, (3, 3), activation='relu'),
         layers.MaxPooling2D((2, 2)),
         layers.Flatten(),
-        layers.Dropout(0.3),
+        layers.Dropout(0.5
+
+                       ),
         layers.Dense(64, activation='relu'),
         layers.Dense(no_classes, activation='softmax'),
     ]))
     model.build(input_shape=input_shape)
     model.summary()
-    model.compile(optimizer=Adam(learning_rate=0.0005),
+    model.compile(optimizer=Adam(learning_rate=0.0001),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
                   metrics=['accuracy'])
     history = model.fit(
@@ -323,11 +333,11 @@ def build_model_transfer_learning(model_tl, trainDS, input_shape, no_classes, ba
                                   IMAGE_SIZE):
     model_tl.include_top = False
 
-    for i in range(150):
+    for i in range(176):
         model_tl.layers[i].trainable = False
 
-    for k in range(150, 175):
-        model_tl.layers[k].trainable = True
+    """for k in range(150, 175):
+        model_tl.layers[k].trainable = False"""
 
     # print(model_tl.summary())
     model = models.Sequential([
@@ -399,16 +409,16 @@ def main():
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
     model_transfer_learning = load_transfer_learning_model(model_path, model_json)
-    # history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
+    #history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
     history, model = build_model_transfer_learning(model_transfer_learning, trainDS, input_shape, classes, BATCH_SIZE,
-                                                   validationDS, EPOCHS, IMAGE_SIZE)
+                                                    validationDS, EPOCHS, IMAGE_SIZE)
     print_data(history)
     PlotData(history, EPOCHS)
     # prediction_on_sample_image(model=model, testDS=testing_dataset)
     # predict_on_multiple_images(model, testing_dataset)
     evaluate_show_score_plot(model, testing_dataset, history)
     precision_recall_and_f1score(model, testing_dataset)
-    roc_auc_plot(model, testing_dataset)
+    # roc_auc_plot(model, testing_dataset)
     save_model(model, model_saving_path)
 
 
