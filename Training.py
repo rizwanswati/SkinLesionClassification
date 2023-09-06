@@ -56,7 +56,7 @@ def precision_recall_and_f1score(model, test_ds):
     test_labels = np.array(test_labels)
     predicted_labels = np.array(predicted_labels)
 
-    # cm = confusion_matrix(test_labels, predicted_labels)
+    cm = confusion_matrix(test_labels, predicted_labels)
     """plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
     plt.title('Confusion Matrix')
     plt.colorbar()
@@ -64,13 +64,15 @@ def precision_recall_and_f1score(model, test_ds):
     plt.xticks(tick_marks, class_names, rotation=55)
     plt.yticks(tick_marks, class_names)"""
 
-    precision = precision_score(test_labels, predicted_labels, average='weighted')
+    precision = precision_score(test_labels, predicted_labels, average='weighted', pos_label=1)
     print("Precision:", precision)
-    recall = recall_score(test_labels, predicted_labels, average='weighted')
+    recall = recall_score(test_labels, predicted_labels, average='weighted', pos_label=1)
     print("Recall:", recall)
-    f1 = f1_score(test_labels, predicted_labels, average='weighted')
+    f1 = f1_score(test_labels, predicted_labels, average='weighted', pos_label=1)
     print("F1-Score:", f1)
-    # print("Confusion matrix:", cm)
+    specificity = recall = recall_score(test_labels, predicted_labels, average='binary', pos_label=0)
+    print(specificity)
+    print("Confusion matrix:", cm)
 
     # Plotting the metrics
     plt.figure(figsize=(10, 6))
@@ -103,8 +105,8 @@ def roc_auc_plot(model, testDS):
     predicted_probabilities = np.array(predicted_probabilities)
 
     # Calculate the ROC curve and AUC score
-    fpr, tpr, thresholds = roc_curve(test_labels, predicted_probabilities[:])
-    auc_score = roc_auc_score(test_labels, predicted_probabilities[:])
+    fpr, tpr, thresholds = roc_curve(test_labels, predicted_probabilities[:, 1])
+    auc_score = roc_auc_score(test_labels, predicted_probabilities[:, 1])
 
     # Plot the ROC curve
     plt.figure(figsize=(8, 6))
@@ -415,7 +417,7 @@ def prepare_build_svm(X, Y, classes):
 
 def main():
     BATCH_SIZE = 32
-    IMAGE_SIZE = 244
+    IMAGE_SIZE = 224
     CHANNELS = 3
     EPOCHS = 50
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
@@ -427,16 +429,16 @@ def main():
     testing_dataset = initialize_testing_dataset(testing_dataset_path, IMAGE_SIZE, BATCH_SIZE)
     validation_dataset = initialize_validation_dataset(validation_dataset_path, IMAGE_SIZE, BATCH_SIZE)
 
-    """print_image_label_batch(training_dataset)
+    print_image_label_batch(training_dataset)
     visualize_images(training_dataset, training_dataset.class_names)
     essential_info(training_dataset, testing_dataset, validation_dataset)
 
     trainDS, testDS, validationDS = cache_shuffle_prefetch(training_dataset, testing_dataset, validation_dataset)
-    trainDS = shuffle_training_data(trainDS)"""
+    trainDS = shuffle_training_data(trainDS)
 
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
-    """history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
+    history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
     print_data(history)
     PlotData(history, EPOCHS)
     prediction_on_sample_image(model=model, testDS=testing_dataset)
@@ -444,13 +446,13 @@ def main():
     evaluate_show_score_plot(model, testing_dataset, history)
     precision_recall_and_f1score(model, testing_dataset)
     roc_auc_plot(model, testing_dataset)
-    model_path = save_model(model, model_saving_path)"""
+    # model_path = save_model(model, model_saving_path)
 
     # for SVM learning, change
-    model_path = "D:/SkinLesionClassification/skin_lesion_detection.h5"
-    feature_extractor, vector = load_model(model_path)
-    X, Y = feature_lable_extractor(feature_extractor, dataset_path, ['benign', 'malignant'])
-    prepare_build_svm(X, Y, ['benign', 'malignant'])
+    # model_path = "D:/SkinLesionClassification/skin_lesion_detection.h5"
+    # feature_extractor, vector = load_model(model_path)
+    # X, Y = feature_lable_extractor(feature_extractor, dataset_path, ['benign', 'malignant'])
+    # prepare_build_svm(X, Y, ['benign', 'malignant'])
 
 
 if __name__ == "__main__":
