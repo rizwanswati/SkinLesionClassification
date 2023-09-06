@@ -295,15 +295,17 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
         resize_and_rescale,
         layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape[1:]),
         layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
+        layers.Conv2D(64, kernel_size=(3, 3), activation='relu', padding='same'),
         layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, kernel_size=(3, 3), activation='relu'),
+        layers.Conv2D(64, kernel_size=(3, 3), activation='relu', padding='same'),
         layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
         layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
         layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+        layers.MaxPooling2D((2, 2)),
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
         layers.MaxPooling2D((2, 2)),
         layers.Flatten(),
         layers.Dropout(0.5),
@@ -449,14 +451,15 @@ def main():
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
     history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
-    print_data(history)
-    PlotData(history, EPOCHS)
-    prediction_on_sample_image(model=model, testDS=testing_dataset)
-    predict_on_multiple_images(model, testing_dataset)
+    save_model(model, model_saving_path)
+    # print_data(history)
+    # PlotData(history, EPOCHS)
+    # prediction_on_sample_image(model=model, testDS=testing_dataset)
+    # predict_on_multiple_images(model, testing_dataset)
     evaluate_show_score_plot(model, testing_dataset, history)
     precision_recall_and_f1score(model, testing_dataset)
-    # roc_auc_plot(model, testing_dataset)
-    # model_path = save_model(model, model_saving_path)
+    #roc_auc_plot(model, testing_dataset)
+    model_path = save_model(model, model_saving_path)
 
     # for SVM learning, change
     # model_path = "D:/SkinLesionClassification/skin_lesion_detection.h5"
