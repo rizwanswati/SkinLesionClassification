@@ -12,6 +12,7 @@
 """
 import h5py
 import keras.models
+import sklearn.metrics
 import tensorflow as tf
 from keras import models, layers
 # from tensorflow.keras import models, layers
@@ -20,7 +21,7 @@ import numpy as np
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn import svm
 from sklearn.metrics import precision_score, recall_score, f1_score, classification_report
-from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.metrics import roc_curve, roc_auc_score, RocCurveDisplay
 from keras.optimizers import Adam
 from sklearn.metrics import confusion_matrix
 import glob
@@ -366,7 +367,7 @@ def preprocess_image(image_path):
     return image_array
 
 
-def prepare_build_svm(X, Y,classes):
+def prepare_build_svm(X, Y, classes):
     for s in range(100):
         X, Y = shuffle(X, Y)
 
@@ -395,8 +396,22 @@ def prepare_build_svm(X, Y,classes):
     svm_lin.fit(train_X, train_Y)
     y_pred = svm_lin.predict(test_X)
     print(classification_report(test_Y, y_pred,
-                                target_names=classes))
-    print(roc_auc_score(test_Y, y_pred))
+                                ))
+    print(confusion_matrix(test_Y, y_pred))
+    fpr, tpr, thresholds = roc_curve(test_Y, y_pred)
+    auc_score = roc_auc_score(test_Y, y_pred)
+
+    # Plot the ROC curve
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, label='ROC Curve (AUC = {:.2f})'.format(auc_score))
+    plt.plot([0, 1], [0, 1], 'k--')  # Diagonal line
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC) Curve')
+    plt.legend()
+    plt.show()
+    print('AUC Score:', auc_score)
+
 
 def main():
     BATCH_SIZE = 32
@@ -434,8 +449,8 @@ def main():
     # for SVM learning, change
     model_path = "D:/SkinLesionClassification/skin_lesion_detection.h5"
     feature_extractor, vector = load_model(model_path)
-    X,Y = feature_lable_extractor(feature_extractor, dataset_path, ['benign', 'malignant'])
-    prepare_build_svm(X,Y,['benign', 'malignant'])
+    X, Y = feature_lable_extractor(feature_extractor, dataset_path, ['benign', 'malignant'])
+    prepare_build_svm(X, Y, ['benign', 'malignant'])
 
 
 if __name__ == "__main__":
