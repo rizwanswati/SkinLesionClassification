@@ -23,6 +23,7 @@ import numpy as np
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.metrics import precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, roc_auc_score
+
 from keras.optimizers import Adam
 from sklearn.metrics import confusion_matrix
 from keras.models import load_model
@@ -59,13 +60,15 @@ def precision_recall_and_f1score(model, test_ds):
     predicted_labels = np.array(predicted_labels)
     predicted_probabilities = np.array(predicted_probabilities)
 
-    precision = precision_score(test_labels, predicted_labels, average='weighted')
+    precision = precision_score(test_labels, predicted_labels, average='weighted', pos_label=1)
     print("Precision:", precision)
-    recall = recall_score(test_labels, predicted_labels, average='weighted')
+    recall = recall_score(test_labels, predicted_labels, average='weighted', pos_label=1)
     print("Recall:", recall)
-    f1 = f1_score(test_labels, predicted_labels, average='weighted')
+    f1 = f1_score(test_labels, predicted_labels, average='weighted', pos_label=1)
     print("F1-Score:", f1)
-    fpr, tpr, thresholds = roc_curve(test_labels, predicted_probabilities[:, 1])
+    specificity = recall_score(test_labels, predicted_labels, average='binary', pos_label=0)
+    print("Specificity:", specificity)
+    fpr, tpr, thresholds = roc_curve(test_labels, predicted_probabilities[:, 1], pos_label=1)
     auc_score = roc_auc_score(test_labels, predicted_probabilities[:, 1])
 
     # Plotting the metrics
@@ -309,7 +312,7 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
     ]))
     model.build(input_shape=input_shape)
     model.summary()
-    model.compile(optimizer=Adam(learning_rate=0.0001),
+    model.compile(optimizer=Adam(learning_rate=0.00001),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
                   metrics=['accuracy'])
     history = model.fit(
@@ -337,7 +340,7 @@ def build_model_transfer_learning(model_tl, trainDS, input_shape, no_classes, ba
         model_tl.layers[i].trainable = False
 
     """for k in range(150, 175):
-        model_tl.layers[k].trainable = False"""
+        model_tl.layers[k].trainable = True"""
 
     # print(model_tl.summary())
     model = models.Sequential([
@@ -384,7 +387,7 @@ def load_transfer_learning_model(model_path, model_json):
 
 
 def main():
-    BATCH_SIZE = 32
+    BATCH_SIZE = 16
     IMAGE_SIZE = 224
     CHANNELS = 3
     EPOCHS = 50
