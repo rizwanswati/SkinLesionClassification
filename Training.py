@@ -396,7 +396,7 @@ def prepare_build_svm(X, Y,classes):
     y_pred = svm_lin.predict(test_X)
     print(classification_report(test_Y, y_pred,
                                 target_names=classes))
-
+    print(roc_auc_score(test_Y, y_pred))
 
 def main():
     BATCH_SIZE = 32
