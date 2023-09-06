@@ -45,6 +45,8 @@ def precision_recall_and_f1score(model, test_ds):
     test_images = []
     test_labels = []
     predicted_labels = []
+    predicted_probabilities = []
+
     class_names = test_ds.class_names
 
     for images_batch, labels_batch in test_ds:
@@ -52,17 +54,12 @@ def precision_recall_and_f1score(model, test_ds):
         test_labels.extend(labels_batch.numpy())
         batch_prediction = model.predict(images_batch)
         predicted_labels.extend(np.argmax(batch_prediction, axis=1))
+        predicted_probabilities.extend(batch_prediction)
+
 
     test_labels = np.array(test_labels)
     predicted_labels = np.array(predicted_labels)
-
-    cm = confusion_matrix(test_labels, predicted_labels)
-    """plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-    plt.title('Confusion Matrix')
-    plt.colorbar()
-    tick_marks = np.arange(len(class_names))
-    plt.xticks(tick_marks, class_names, rotation=55)
-    plt.yticks(tick_marks, class_names)"""
+    predicted_probabilities = np.array(predicted_probabilities)
 
     precision = precision_score(test_labels, predicted_labels, average='weighted', pos_label=1)
     print("Precision:", precision)
@@ -72,7 +69,9 @@ def precision_recall_and_f1score(model, test_ds):
     print("F1-Score:", f1)
     specificity = recall = recall_score(test_labels, predicted_labels, average='binary', pos_label=0)
     print(specificity)
-    print("Confusion matrix:", cm)
+    fpr, tpr, thresholds = roc_curve(test_labels, predicted_probabilities[:, 1])
+    auc_score = roc_auc_score(test_labels, predicted_probabilities[:, 1])
+
 
     # Plotting the metrics
     plt.figure(figsize=(10, 6))
@@ -89,8 +88,19 @@ def precision_recall_and_f1score(model, test_ds):
     plt.legend()
     plt.show()
 
+    # Plot the ROC curve
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, label='ROC Curve (AUC = {:.2f})'.format(auc_score))
+    plt.plot([0, 1], [0, 1], 'k--')  # Diagonal line
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC) Curve')
+    plt.legend()
+    plt.show()
+    print('AUC Score:', auc_score)
 
-def roc_auc_plot(model, testDS):
+
+"""def roc_auc_plot(model, testDS):
     test_images = []
     test_labels = []
     predicted_probabilities = []
@@ -117,7 +127,7 @@ def roc_auc_plot(model, testDS):
     plt.title('Receiver Operating Characteristic (ROC) Curve')
     plt.legend()
     plt.show()
-    print('AUC Score:', auc_score)
+    print('AUC Score:', auc_score)"""
 
 
 def PlotData(history, EPOCHS):
@@ -445,7 +455,7 @@ def main():
     predict_on_multiple_images(model, testing_dataset)
     evaluate_show_score_plot(model, testing_dataset, history)
     precision_recall_and_f1score(model, testing_dataset)
-    roc_auc_plot(model, testing_dataset)
+    # roc_auc_plot(model, testing_dataset)
     # model_path = save_model(model, model_saving_path)
 
     # for SVM learning, change
