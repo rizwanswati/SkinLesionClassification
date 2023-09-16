@@ -1,3 +1,14 @@
 DDI_Clean/
 *.png
 skin_lesion.h5
+*.h5
+*.jpg
+.idea/.name
+TestingISIC.py
+.idea/.gitignore
+.idea/misc.xml
+.idea/modules.xml
+.idea/Skin Lesion detection code.iml
+.idea/vcs.xml
+.idea/inspectionProfiles/profiles_settings.xml
+DDI_Clean_Output/Data Augmentation.rar
