@@ -292,7 +292,6 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
     ).prefetch(buffer_size=tf.data.AUTOTUNE)
 
     model = models.Sequential([
-        resize_and_rescale,
         layers.Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape[1:]),
         layers.MaxPooling2D((2, 2)),
         layers.Conv2D(64, kernel_size=(3, 3), activation='relu', padding='same'),
