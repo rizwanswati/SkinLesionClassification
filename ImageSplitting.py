@@ -72,5 +72,6 @@ def main():
     split_validation_test_images(valid_folder_path, valid_benign, valid_malignant, class_file_path, valid_folder)
     split_validation_test_images(test_folder_path, test_benign, test_malignant, class_file_path, test_folder)
 
+
 if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@ import cv2
 import glob
 from PIL import Image, ImageFilter
 import numpy as np
+from skimage import exposure
 
 
 def remove_hair(ddi_black_hair, ddi_clean_output):
@@ -70,15 +71,27 @@ def remove_blue_marks(ddi_blue_marks, ddi_blue, ddi_clean_output):
                     [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
 
+def CLAHEContrast(ddi_black_hair, ddi_hair):
+    for filePath in glob.glob(ddi_black_hair):
+        src = cv2.imread(filePath)
+        filename = filePath.partition("\\")[2]
+
+        blueImage = cv2.imread(ddi_hair + "/" + filename)
+
+        equalized_adapthist = exposure.equalize_adapthist(blueImage)
+        cv2.imwrite(ddi_hair + "/_" + filename, equalized_adapthist,
+                    [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+
+
 def main():
     ddi_black_hair = "D:/SkinLesionClassification/DDI_hair/*.png"
-    # ddi_hair = "D:/SkinLesionClassification/DDI_hair/"
+    ddi_hair = "D:/SkinLesionClassification/DDI_hair/"
     ddi_clean_output = "D:/SkinLesionClassification/DDI_Clean_Output/"
     ddi_blue_marks = "D:/SkinLesionClassification/DDI_Clean_Output/DDI_inpainted/*.png"
     ddi_blue = "D:/SkinLesionClassification/DDI_Clean_Output/DDI_inpainted/"
-
-    remove_hair(ddi_black_hair, ddi_clean_output)
-    remove_blue_marks(ddi_blue_marks, ddi_blue, ddi_clean_output)
+    # remove_hair(ddi_black_hair, ddi_clean_output)
+    # remove_blue_marks(ddi_blue_marks, ddi_blue, ddi_clean_output)
+    CLAHEContrast(ddi_black_hair, ddi_hair)
 
 
 if __name__ == '__main__':
