@@ -336,11 +336,11 @@ def build_model_transfer_learning(model_tl, trainDS, input_shape, no_classes, ba
                                   IMAGE_SIZE):
     model_tl.include_top = False
 
-    for i in range(176):
-        model_tl.layers[i].trainable = False
+    for i in range(0):
+        model_tl.layers[i].trainable = True
 
-    """for k in range(150, 175):
-        model_tl.layers[k].trainable = True"""
+    for k in range(1, 6):
+        model_tl.layers[k].trainable = False
 
     # print(model_tl.summary())
     model = models.Sequential([
@@ -390,7 +390,7 @@ def main():
     BATCH_SIZE = 16
     IMAGE_SIZE = 224
     CHANNELS = 3
-    EPOCHS = 50
+    EPOCHS = 1
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
@@ -411,18 +411,19 @@ def main():
 
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
-    model_transfer_learning = load_transfer_learning_model(model_path, model_json)
+    # model_transfer_learning = load_transfer_learning_model(model_path, model_json)
+    model_HAM10000 = load_model("model_HAM10000.h5")
     #history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
-    history, model = build_model_transfer_learning(model_transfer_learning, trainDS, input_shape, classes, BATCH_SIZE,
-                                                    validationDS, EPOCHS, IMAGE_SIZE)
+    history, model = build_model_transfer_learning(model_HAM10000, trainDS, input_shape, classes, BATCH_SIZE,
+                                                   validationDS, EPOCHS, IMAGE_SIZE)
     print_data(history)
     PlotData(history, EPOCHS)
     # prediction_on_sample_image(model=model, testDS=testing_dataset)
     # predict_on_multiple_images(model, testing_dataset)
-    evaluate_show_score_plot(model, testing_dataset, history)
-    precision_recall_and_f1score(model, testing_dataset)
+    # evaluate_show_score_plot(model, testing_dataset, history)
+    # precision_recall_and_f1score(model, testing_dataset)
     # roc_auc_plot(model, testing_dataset)
-    save_model(model, model_saving_path)
+    # save_model(model, model_saving_path)
 
 
 if __name__ == "__main__":
