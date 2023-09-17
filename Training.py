@@ -339,8 +339,11 @@ def build_model_transfer_learning(model_tl, trainDS, input_shape, no_classes, ba
     for i in range(0):
         model_tl.layers[i].trainable = True
 
-    for k in range(1, 6):
+    for k in range(1, 7):
         model_tl.layers[k].trainable = False
+
+    """for j in range(13, 19):
+        model_tl.layers[j].trainable = False"""
 
     # print(model_tl.summary())
     model = models.Sequential([
@@ -412,12 +415,13 @@ def main():
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
     # model_transfer_learning = load_transfer_learning_model(model_path, model_json)
-    model_HAM10000 = load_model("model_HAM10000.h5")
+    model_HAM10000 = load_model("model_VGG16ISIC.h5")
+    print(model_HAM10000.summary())
     #history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
     history, model = build_model_transfer_learning(model_HAM10000, trainDS, input_shape, classes, BATCH_SIZE,
                                                    validationDS, EPOCHS, IMAGE_SIZE)
-    print_data(history)
-    PlotData(history, EPOCHS)
+    # print_data(history)
+    # PlotData(history, EPOCHS)
     # prediction_on_sample_image(model=model, testDS=testing_dataset)
     # predict_on_multiple_images(model, testing_dataset)
     # evaluate_show_score_plot(model, testing_dataset, history)
