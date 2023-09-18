@@ -1,6 +1,8 @@
 import os
 import cv2
+import splitfolders
 import numpy as np
+import pandas as pd
 from skimage.exposure import exposure
 from sklearn import svm
 from sklearn.model_selection import train_test_split
@@ -26,29 +28,27 @@ def preprocess_and_extract_features(image_path, IMAGE_SIZE):
 def generate_segmentation_mask(image_path_segmentation, IMAGE_SIZE):
     image = cv2.imread(image_path_segmentation, cv2.IMREAD_COLOR)
     image = cv2.resize(image, IMAGE_SIZE)
-    equalized_adapthist = exposure.equalize_adapthist(image)
 
     # converting to grayscale
     img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # applying Otsu thresholding
     # as an extra flag in binary thresholding
-    ret, thresh1 = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY +
-                                 cv2.THRESH_OTSU)
-
-    """hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    # Define the range for skin color in HSV
-    lower_skin = np.array([0, 20, 70], dtype=np.uint8)
-    upper_skin = np.array([20, 255, 255], dtype=np.uint8)
-
-    # Create a binary mask for skin color
-    skin_mask = cv2.inRange(hsv_image, lower_skin, upper_skin)"""
+    ret, thresh1 = cv2.threshold(img, 100, 255, cv2.THRESH_OTSU)
 
     return thresh1
 
 
+def split_into_test_train():
+    image_path = "D:/SkinLesionClassification/SegmentationMasks"
+    print((os.listdir(image_path)))
+    splitfolders.ratio(image_path, seed=1337, output="DDI-Split", ratio=(0.8, 0.2))
+
+
 def main():
+
+    # split_into_test_train()
+
     # Load and preprocess the dataset, including segmentation mask generation
     IMAGE_SIZE = (224, 224)
     dataset = "D:/SkinLesionClassification/DDI_original"
@@ -63,13 +63,13 @@ def main():
         class_path = os.path.join(dataset_path, class_name)
         for image_name in os.listdir(class_path):
             image_path = os.path.join(class_path, image_name)
-            # features = preprocess_and_extract_features(image_path, IMAGE_SIZE)
+            features = preprocess_and_extract_features(image_path, IMAGE_SIZE)
             segmentation_mask = generate_segmentation_mask(image_path, IMAGE_SIZE)
-            # data.append(features)
-            # labels.append(class_idx)
+            data.append(features)
+            labels.append(class_idx)
             masks.append(segmentation_mask)
             cv2.imwrite("D:/SkinLesionClassification/SegmentationMasks/" + image_name, segmentation_mask,
-                        [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+                       [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
     """ for masks_batch in masks:
         for i in range(12):

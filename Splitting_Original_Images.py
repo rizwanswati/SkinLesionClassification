@@ -21,10 +21,10 @@ def split_original_images(input_image_folder, output_benign, output_malignant, c
 
 
 def main():
-    original_folder_path = "D:/SkinLesionClassification/DDI_original/*.png"
-    original_folder = "D:/SkinLesionClassification/DDI_original/"
-    original_benign = "D:/SkinLesionClassification/DDI_original/benign"
-    original_malignant = "D:/SkinLesionClassification/DDI_original/malignant"
+    original_folder_path = "D:/SkinLesionClassification/SegmentationMasks/*.png"
+    original_folder = "D:/SkinLesionClassification/SegmentationMasks/"
+    original_benign = "D:/SkinLesionClassification/SegmentationMasks/benign"
+    original_malignant = "D:/SkinLesionClassification/SegmentationMasks/malignant"
     class_file_path = "D:/SkinLesionClassification/ddi_metadata.csv"
 
     split_original_images(original_folder_path, original_benign, original_malignant, class_file_path, original_folder)
