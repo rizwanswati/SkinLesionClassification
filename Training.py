@@ -336,13 +336,13 @@ def build_model_transfer_learning(model_tl, trainDS, input_shape, no_classes, ba
                                   IMAGE_SIZE):
     model_tl.include_top = False
 
-    for i in range(0):
-        model_tl.layers[i].trainable = True
+    for i in range(19):
+        model_tl.layers[i].trainable = False
 
-    for k in range(1, 7):
-        model_tl.layers[k].trainable = False
+    """for k in range(130, 176):
+        model_tl.layers[k].trainable = True
 
-    """for j in range(13, 19):
+    for j in range(176, 177):
         model_tl.layers[j].trainable = False"""
 
     # print(model_tl.summary())
@@ -390,10 +390,10 @@ def load_transfer_learning_model(model_path, model_json):
 
 
 def main():
-    BATCH_SIZE = 16
-    IMAGE_SIZE = 224
+    BATCH_SIZE = 32
+    IMAGE_SIZE = 100
     CHANNELS = 3
-    EPOCHS = 1
+    EPOCHS = 50
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
@@ -415,18 +415,17 @@ def main():
     input_shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, CHANNELS)
     classes = 2
     # model_transfer_learning = load_transfer_learning_model(model_path, model_json)
-    model_HAM10000 = load_model("model_VGG16ISIC.h5")
-    print(model_HAM10000.summary())
-    #history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
-    history, model = build_model_transfer_learning(model_HAM10000, trainDS, input_shape, classes, BATCH_SIZE,
+    model_VGG16 = load_model("model_HAM1000.h5")
+    # history, model = build_model(trainDS, input_shape, classes, BATCH_SIZE, validationDS, EPOCHS, IMAGE_SIZE)
+    history, model = build_model_transfer_learning(model_VGG16, trainDS, input_shape, classes, BATCH_SIZE,
                                                    validationDS, EPOCHS, IMAGE_SIZE)
-    # print_data(history)
-    # PlotData(history, EPOCHS)
+    print_data(history)
+    PlotData(history, EPOCHS)
     # prediction_on_sample_image(model=model, testDS=testing_dataset)
     # predict_on_multiple_images(model, testing_dataset)
-    # evaluate_show_score_plot(model, testing_dataset, history)
-    # precision_recall_and_f1score(model, testing_dataset)
-    # roc_auc_plot(model, testing_dataset)
+    evaluate_show_score_plot(model, testing_dataset, history)
+    precision_recall_and_f1score(model, testing_dataset)
+    roc_auc_plot(model, testing_dataset)
     # save_model(model, model_saving_path)
 
 
