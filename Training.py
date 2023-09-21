@@ -288,13 +288,13 @@ def build_model(trainDS, input_shape, no_classes, batch_size, validationDS, epoc
         layers.Conv2D(64, (3, 3), activation='relu'),
         layers.MaxPooling2D((2, 2)),
         layers.Flatten(),
-        layers.Dropout(0.3),
+        layers.Dropout(0.5),
         layers.Dense(64, activation='relu'),
         layers.Dense(no_classes, activation='softmax'),
     ])
     model.build(input_shape=input_shape)
     model.summary()
-    model.compile(optimizer=Adam(learning_rate=0.0004),
+    model.compile(optimizer=Adam(learning_rate=0.0001),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
                   metrics=['accuracy'])
     history = model.fit(
@@ -325,7 +325,7 @@ def main():
     BATCH_SIZE = 32
     IMAGE_SIZE = 244
     CHANNELS = 3
-    EPOCHS = 42
+    EPOCHS = 40
     dataset_path = "D:/SkinLesionClassification/TrainingDS"
     testing_dataset_path = "D:/SkinLesionClassification/Testing"
     validation_dataset_path = "D:/SkinLesionClassification/Validation/"
